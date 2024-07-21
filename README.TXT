@@ -1,4 +1,4 @@
-# Seekright Tool for Easy Master Audit
+# Seekright Tool for Easy Master Audit (STEMA)
 
 ## Usage
 @ All video filename should be unique (USE THE EXACT FILE NAME FROM DASHCAM BASED ON TIME)
