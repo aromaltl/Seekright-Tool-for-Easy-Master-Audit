@@ -1,0 +1,65 @@
+speed: 1.1
+play_size: [1920, 1080]  # (1280, 720)
+det_loc:
+  default: 3
+  light_nth_last: 3
+  hazard_mark###: 3
+keys:
+  right: '@#EWEA'
+  left: 'F#CTCFC'
+  
+remarks:
+  default:
+  
+linear:
+    - Bad_Crash_Barrier
+    - Bad_Fence
+    - Bad_Guard_Rails
+    - Bad_Jersey_Barrier
+    - Bad_Kerbs
+    - Bad_Lane
+    - Bad_MBCB
+    - Cracks
+    - Crash_Barrier
+    - Fence
+    - Guard_Rails
+    - Jersey_Barrier
+    - Kerbs
+    - MBCB
+    - Patch
+    - Sand_Accumulation
+comment:
+  Cracks:
+    - Alligator Crack
+    - Transverse Crack
+  default:
+    - Longitudinal Crack
+    - Raveling Crack
+    - Alligator Crack
+    - Transverse Crack
+    - Patching
+    - Pothole
+  Signboard_Mandatory_Board:
+    - Round red and white
+    - Round red and blue
+    - Round white & blue
+  Signboard_Mandatory_Board_STOP:
+    - Hexagone red and white
+  Signboard_Caution_Board:
+    - Triangle Red and white
+    - Upside down triangle red and white
+    - Triangle red and yellow
+  Signboard_Information_Board:
+    - Rectangular
+  Road_Markings:
+    - Left
+    - Right
+    - Straight
+  Signboard_Hazard_Board:
+    - Rectangular_Hazard
+  Street_Light:
+    - Single_Arm
+    - Double_Arm
+    - Triple_Arm
+    - Four_Arm
+  

@@ -1,0 +1,10 @@
+numpy
+opencv-draw-annotation
+opencv-python
+pandas
+PySimpleGUI==4.60.5
+python-dateutil
+pytz
+six
+tzdata
+PyYAML
