@@ -1,15 +1,20 @@
 speed: 1.1
 play_size: [1920, 1080]  # (1280, 720)
 det_loc:
-  default: 3
-  light_nth_last: 3
-  hazard_mark###: 3
+  default: 2
+  light_nth_last: 2
+  hazard_mark###: 2
 keys:
   right: '@#EWEA'
   left: 'F#CTCFC'
   
 remarks:
   default:
+    - Broken
+    - Bent
+    - Plant Overgrown
+    - Dirt
+    - Not Working
   
 linear:
     - Bad_Crash_Barrier
@@ -19,14 +24,12 @@ linear:
     - Bad_Kerbs
     - Bad_Lane
     - Bad_MBCB
-    - Cracks
     - Crash_Barrier
     - Fence
     - Guard_Rails
     - Jersey_Barrier
     - Kerbs
     - MBCB
-    - Patch
     - Sand_Accumulation
 comment:
   Cracks:
@@ -42,13 +45,17 @@ comment:
   Signboard_Mandatory_Board:
     - Round red and white
     - Round red and blue
-    - Round white & blue
+    - Round white and blue
+    - Round Red and Yellow
+    - Round White and Black
   Signboard_Mandatory_Board_STOP:
     - Hexagone red and white
   Signboard_Caution_Board:
     - Triangle Red and white
     - Upside down triangle red and white
     - Triangle red and yellow
+    - Triangle Black and Yellow
+    - Triangle White and Black
   Signboard_Information_Board:
     - Rectangular
   Road_Markings:
