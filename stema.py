@@ -132,10 +132,10 @@ def addtoJSON(frameNo, asset, bbox, data, id_):
         data[str(frameNo)][asset] = [[c, bbox[0], bbox[1]]]
 
 
-def verify(ip=None,CSV=None,output_frame=0):
+def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
     column = ''
     PLAY = True
-    sg.theme('Black')
+    sg.theme('DarkBlue14')
     col11 = sg.Image(filename='seek.png', key='image')  # Coloumn 1 = Image view
     Output = sg.Text()
     Input = sg.Text()
@@ -183,18 +183,20 @@ def verify(ip=None,CSV=None,output_frame=0):
     # output_frame = 0
     Shift = False
     stream=False
-
+    window_read = True
     # ip = ''
     PREV_SELECTED_ASSET = ''
     delete_val = ''
-    window_read=True
+    event_t, values_t = "",{}
     while True:
 
         letter = None
+       
+        event_t, values_t = window.read(timeout= auto_start)
         
-        event_t, values_t = window.read()
         if window_read:
             event, values  =  event_t, values_t
+        
 
 
         # print((event, values))
@@ -216,7 +218,7 @@ def verify(ip=None,CSV=None,output_frame=0):
         # text_el em.update(event)
 
         if event == 'EXIT' or event == sg.WIN_CLOSED:
-            return 
+            return "STOP"
         if event == 'Go' or (len(values['skip']) and ("Return" in event or event == "\r")):
             if int(values['skip']) % 2 == 0:
                 output_frame = int(values['skip'])
@@ -225,7 +227,7 @@ def verify(ip=None,CSV=None,output_frame=0):
             window['Delete_drop'].Update(values=drop_down_list(output_frame, data))
             window['skip'].Update('')
         # print(ip)
-        if event == 'Submit Videos':
+        if event == 'Submit Videos' or  auto_start:
             if ip is None:
                 ip = values['-IN-']
             if CSV  is None:
@@ -233,7 +235,7 @@ def verify(ip=None,CSV=None,output_frame=0):
             if CSV is not None:
                 data = load_json(CSV)
 
-        if event == 'START':
+        if event == 'START' or  auto_start:
             if len(ip) > 0 and len(CSV) > 0:
                 print('START')
                 cap = cv2.VideoCapture(str(ip))
@@ -273,6 +275,7 @@ def verify(ip=None,CSV=None,output_frame=0):
             imgbytes = cv2.imencode('.png', img)[1].tobytes()
             window['image'].update(data=imgbytes)
 
+        auto_start=None
         if stream:
 
             if event == 'Add Data' or 'alt_l' in event.lower() or 'control_l' in event.lower():
@@ -335,6 +338,7 @@ def verify(ip=None,CSV=None,output_frame=0):
                     BASE_PREV_SELECTED_ASSET = PREV_SELECTED_ASSET.replace("_Start","").replace("_End","")
                     if BASE_PREV_SELECTED_ASSET in lin:
                         side = 1 if  (r[0]+(r[2]//2) ) > w//2 else 0
+                        
                         # if data["flag"][BASE_PREV_SELECTED_ASSET][side]==1: # only at end 
                         linear_remove(data,BASE_PREV_SELECTED_ASSET,side,output_frame,w)
 
@@ -484,4 +488,7 @@ if __name__ == "__main__":
         if breaker:
             break
         print("again going for verification")
-        verify(ip=ip,CSV=CSV,output_frame=output_frame)
+        STOP = verify(ip=ip,CSV=CSV,output_frame=output_frame,auto_start=1)
+        if STOP =="STOP":
+            break
+        
