@@ -18,10 +18,14 @@ def save_json(data, CSV):
 
 
 def linear_remove(data,asset,side,st,w):
+
+    Base_Asset=asset.replace("_Start","_End")
+    if Base_Asset not in set(config["linear"]):
+        return None
     while st > -1:
         st-=2
         x=str(st)
-        Base_Asset=asset.replace("_Start","_End")
+        
         if x not in data :
             continue
         if Base_Asset not in data[x]:
@@ -152,7 +156,7 @@ def opencv_gui(cap,cap2,data,w,h,linear,CSV,vname,total_frames,frame,output_fram
             # frame = addBBox(frame, output_frame, data)
 
             for ass in data[str(output_frame)]:
-                for items in data[str(output_frame)][ass]:
+                for ind,items in enumerate(data[str(output_frame)][ass]):
                     if ass in lin:
 
                         side =  1 if ((items[1][0]+items[2][0])//2) > w//2 else 0
@@ -175,10 +179,24 @@ def opencv_gui(cap,cap2,data,w,h,linear,CSV,vname,total_frames,frame,output_fram
                                 linear_remove(data,ass,side,output_frame,w)
                                 data["flag"][ass][side]=(data["flag"][ass][side]+1)%2
                                 temp_data = data[str(output_frame)].copy()
-                                temp_data[ass+edge]=data[str(output_frame)][ass]
-                                del temp_data[ass]
+
+                                data[ass+edge]+=1
+                                drop_item=temp_data[ass].pop(ind)
+                                drop_item[0]=str(data[ass+edge])
+                                if ass+edge in temp_data:
+                                    temp_data[ass+edge].append(drop_item)
+                                else:
+                                    temp_data[ass+edge]=[drop_item]
+
+                                del del_ast
                                 cv2.destroyWindow("OUT")
                                 return False, output_frame, temp_data,frame
+                            if key_press == 27:
+                                del del_ast
+
+                                cv2.destroyWindow("OUT")
+                                return True, output_frame, None,None
+
     
                     else:          
 
