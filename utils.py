@@ -340,7 +340,7 @@ class mouse_call:
             ids,asset = self.ast
 
             if "_End" in asset or  "Start" in asset: ## update flag if manually added linear deleted
-                side =  '1' if ((ids[1][0]+ids[2][0])//2) > self.w//2 else '0'
+                side =  '1' if ((ids[1][0]+ids[2][0])//2) > self.video_size[0]//2 else '0'
                 asset = asset.replace("_Start","").replace("_End","")
                 data["flag"][asset][side]=(data["flag"][asset][side]+1)%2
                 
