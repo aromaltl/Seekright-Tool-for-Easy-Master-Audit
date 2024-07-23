@@ -14,8 +14,8 @@ with open("config.yaml","r") as f:
 
 from upload import converting_to_asset_format, generate, confirmation
 from final_submit import final_verify
-from utils import mouse_call, extract_for_annotations, linear_data,opencv_gui, addBBox, linear_remove,remove_asset
-
+from utils import mouse_call, extract_for_annotations, linear_data, addBBox, linear_remove
+from utils import Task
 
 """
 LAYOUT DESIGN
@@ -159,7 +159,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
              [sg.Button('START', size=(15, 1)), sg.Button('STOP', size=(15, 1))],
 
              [sg.Button('PREVIOUS', size=(15, 1)), sg.Button('NEXT', size=(15, 1))],
-             [sg.Button('Generate'), sg.Text('<-Generate final json and images', size=(35, 1))],
+             [sg.Button('Generate'), sg.Text('<-Generate final json', size=(35, 1))],
              [sg.Button('SAVE FRAME', size=(15, 1)), sg.Button('EXIT', size=(15, 1)), sg.Text('', key='text'), Output,
               sg.Text('Frame no: '), Input]]
     # Select Color Theme
@@ -187,7 +187,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
     # ip = ''
     PREV_SELECTED_ASSET = ''
     delete_val = ''
-    event_t, values_t = "",{}
+    
     while True:
 
         letter = None
@@ -228,12 +228,14 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
             window['skip'].Update('')
         # print(ip)
         if event == 'Submit Videos' or  auto_start:
+            
             if ip is None:
                 ip = values['-IN-']
             if CSV  is None:
                 CSV = values['CSV']
             if CSV is not None:
                 data = load_json(CSV)
+            
 
         if event == 'START' or  auto_start:
             if len(ip) > 0 and len(CSV) > 0:
@@ -263,6 +265,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                 stream = True
                 linear = linear_data(data,total_frames,w)
                 lin=set(config["linear"])
+                run =  Task(CSV,cap,cap2,w,h,vname,total_frames,linear)
 
 
 
@@ -276,6 +279,9 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
             window['image'].update(data=imgbytes)
 
         auto_start=None
+        
+
+
         if stream:
 
             if event == 'Add Data' or 'alt_l' in event.lower() or 'control_l' in event.lower():
@@ -337,12 +343,12 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                     data[PREV_SELECTED_ASSET] += 1
                     BASE_PREV_SELECTED_ASSET = PREV_SELECTED_ASSET.replace("_Start","").replace("_End","")
                     if BASE_PREV_SELECTED_ASSET in lin:
-                        side = 1 if  (r[0]+(r[2]//2) ) > w//2 else 0
+                        side = '1' if  (r[0]+(r[2]//2) ) > w//2 else '0'
                         
                         # if data["flag"][BASE_PREV_SELECTED_ASSET][side]==1: # only at end 
                         linear_remove(data,BASE_PREV_SELECTED_ASSET,side,output_frame,w)
-
-                        data["flag"][BASE_PREV_SELECTED_ASSET][side]=(data["flag"][BASE_PREV_SELECTED_ASSET][side]+1)%2
+                        if PREV_SELECTED_ASSET != BASE_PREV_SELECTED_ASSET:
+                            data["flag"][BASE_PREV_SELECTED_ASSET][side]=(data["flag"][BASE_PREV_SELECTED_ASSET][side]+1)%2
 
                     addtoJSON(output_frame, PREV_SELECTED_ASSET, [(r[0], r[1]), (r[2] + r[0], r[3] + r[1])], data,
                               data[PREV_SELECTED_ASSET])
@@ -396,7 +402,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
 
             # if (event == "Delete Data" or event == "Delete:119" or event == "\x7f" ) and len(delete_val):
             if ("delete" in event.lower() or event == "\x7f") and len(delete_val):
-                remove_asset(data,output_frame, total_frames,delete_val)
+                run.remove_asset(data,output_frame,delete_val)
                 extract_for_annotations(cap2,output_frame,vname)
                 # found = 25
 
@@ -440,7 +446,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
 
             if event == 'PLAY' or 'space:' in event.lower() and 'back' not in event.lower() or event == " ":  # backspace should not activate
                 while True:
-                    BRAKE, output_frame, temp,frame = opencv_gui(cap,cap2,data,w,h,linear,CSV,vname,total_frames,frame,output_frame)
+                    BRAKE, output_frame, temp,frame = run.opencv_gui(data,frame,output_frame)
                     if not BRAKE :
                         
                         data[str(output_frame)]=temp
