@@ -561,8 +561,8 @@ class Task:
                             if str(items[0]) + ass not in asset_seen:
                                 asset_seen.add(str(items[0]) + ass)
                                 new_asset = True
-                                if "Start" not in ass and "_End" not in ass:
-                                    delete_val = items[0],ass
+                                
+                                delete_val = items[0],ass
                                 draw_bounding_box(frame, (items[1][0], items[1][1], items[2][0], items[2][1]),
                                                     labels=[items[0], ass],
                                                     color='#c62424', border_thickness=3,)
