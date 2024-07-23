@@ -256,7 +256,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
 
             draw_bounding_box(image, (current[3][0], current[3][1], current[4][0], current[4][1]), labels=[label],
                               color='green')
-        if event == 'Far Asset':
+        if event == 'Far Asset' or 'alt_l' in event.lower():
             data["Assets"][index][6]=(data["Assets"][index][6]+1)%2
             save_json(data, json)
 
