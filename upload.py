@@ -30,15 +30,14 @@ def converting_to_asset_format(data_json, total_frames):
             continue
 
         for asset in data_json[i]:
-            if asset not in linears:
-                for index, v in enumerate(data_json[i][asset]):
-                    if asset not in data:
-                        data[asset] = {}
-                    if asset in linears  and  int(v[0]) < 9000: # ignore linear which arenot manually added
-                        continue
-                    if int(v[0]) not in data[asset]:
-                        data[asset][int(v[0])] = []
-                    data[asset][int(v[0])].append([i, v[1], v[2]])
+            for index, v in enumerate(data_json[i][asset]):
+                if asset not in data:
+                    data[asset] = {}
+                if asset in linears  and  int(v[0]) < 9000: # ignore linear which arenot manually added
+                    continue
+                if int(v[0]) not in data[asset]:
+                    data[asset][int(v[0])] = []
+                data[asset][int(v[0])].append([i, v[1], v[2]])
     print("converting_to_asset_format ended!!")
     return data
 
