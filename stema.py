@@ -302,7 +302,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
 
 
                         elif column == "ADD_NEW_ASSET":
-                            data[val["New_Asset"]] = 0
+                            data[val["New_Asset"]] = 9900
                             asset_window.close()
                             assets.append(val["New_Asset"])
                             assets.sort(key=lambda strings: len(strings), reverse=True)
