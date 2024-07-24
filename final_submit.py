@@ -31,7 +31,7 @@ REMARK = ['Bent', 'Broken', 'Missing', 'Plant Overgrown', 'Paint Worn Off', 'Dir
 REMARK = config["remarks"]
 COMMENT = config["comment"]
 
-
+linear = set(config["linear"])
 
 # col12 = [[sg.Text('ENTER VIDEO PATH')],
 
@@ -71,8 +71,11 @@ def show_near_frames(data,ind):
         
 
 def sort_order(val):
+
     frame=val[2]
-    if "_Start" in val[0] or "_End" in val[0]:
+    if val[0] in linear:
+        BASE_NAME = 'Z'+val[0]
+    elif "_Start" in val[0] or "_End" in val[0]:
         BASE_NAME = val[0].replace("_End","").replace("_Start","")
     else:
         BASE_NAME = val[0].replace("RIGHT_","").replace("LEFT_","")
