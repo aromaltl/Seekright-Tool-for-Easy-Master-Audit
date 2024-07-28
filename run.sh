@@ -1,1 +1,0 @@
-python3 master_verification.py
