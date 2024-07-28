@@ -298,6 +298,7 @@ class mouse_call:
         self.input =None
         self.changed=False
         self.video_size = width,height
+        
 
         # self.cap=cap
         # self.vname = vname
@@ -407,6 +408,7 @@ class Task:
         self.vname  = vname
         self.total_frames = total_frames
         self.linear = linear
+        self.asset_seen =set()
     
 
     def remove_asset(self, data,output_frame,delete_val):
@@ -455,7 +457,7 @@ class Task:
                 break
 
 
-    def next_asset(self,data,output_frame,asset_seen):
+    def next_asset(self,data,output_frame):
         '''
         jump to next seen asset 
         '''
@@ -464,7 +466,7 @@ class Task:
                 data[str(new_frames)] = {}
             for ass in data[str(new_frames)]:
                 for items in data[str(new_frames)][ass]:
-                    if str(items[0]) + ass not in asset_seen:
+                    if str(items[0]) + ass not in self.asset_seen:
                         self.cap.set(1,new_frames-2)
                         return new_frames-2
 
@@ -476,7 +478,7 @@ class Task:
         
         ret = True
         PAUSE = True
-        asset_seen = set()
+        # asset_seen = set()
         delay = 0.008 / config['speed']
         play_size = config["play_size"]
         lin = set(config["linear"])
@@ -558,8 +560,8 @@ class Task:
         
                         else:          
 
-                            if str(items[0]) + ass not in asset_seen:
-                                asset_seen.add(str(items[0]) + ass)
+                            if str(items[0]) + ass not in self.asset_seen:
+                                self.asset_seen.add(str(items[0]) + ass)
                                 new_asset = True
                                 
                                 delete_val = items[0],ass
@@ -605,7 +607,7 @@ class Task:
 
             if key_press == ord('w'):
                 PAUSE=False
-                output_frame=self.next_asset(data,output_frame,asset_seen)
+                output_frame=self.next_asset(data,output_frame)
             if key_press == 233:
                 window_read=False
                 event = 'alt_l'
@@ -614,7 +616,7 @@ class Task:
                 # del obj
                 break
         del del_ast
-
+        self.asset_seen=set()
         cv2.destroyWindow("OUT")
         return True, output_frame, None,None
     
