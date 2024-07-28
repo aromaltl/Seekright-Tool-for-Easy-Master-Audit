@@ -68,12 +68,15 @@ def asset_select_window(keys, cols,hide=True):
     r = d % cols
     keys = keys + [""] * (cols - r)
     n = len(keys) // cols
+    
     for hh in range(n):
         layout.append([sg.Button(keys[x + hh * cols], size=(32, 1), pad=(0, 0)) for x in range(cols)])
 
-    layout.append([sg.InputText('', key='New_Asset', size=(58, 1)),sg.Button('FILTER', size=(18, 1)) ,sg.Button('ADD_NEW_ASSET', size=(18, 1))])  # ,
+    layout.append([sg.InputText('', key='New_Asset', size=(58, 1)) ,sg.Button('ADD_NEW_ASSET', size=(18, 1))])  # ,
+    
     win = sg.Window("Select Asset", layout, resizable=True, finalize=True, enable_close_attempted_event=True,
-                    element_justification='c', return_keyboard_events=False)
+                    element_justification='c', return_keyboard_events=True)
+    
     if hide:
         win.hide()
     return win
@@ -258,8 +261,10 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                         x = int(x)
                     except:
                         assets.append(x)
-                assets.sort(key=lambda strings: len(strings), reverse=True)
+                
+                assets.sort(key=lambda strings: strings.replace("_End","").replace("Bad_","").replace("_Start",""))
                 asset_window = asset_select_window(assets, 6)
+
                 window['Delete_drop'].Update(values=drop_down_list(output_frame, data))
 
                 stream = True
@@ -281,54 +286,45 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
         auto_start=None
         
 
-
         if stream:
 
             if event == 'Add Data' or 'alt_l' in event.lower() or 'control_l' in event.lower():
                 
                 if event == 'Add Data' or 'alt_l' in event.lower():
                     asset_window.UnHide()
-                    saved_window = asset_window
-                    close_filter_window =False
+
                     while True:
                         column, val = asset_window.read()
+                        segment=val["New_Asset"].lower()
+                        for fil in assets :
+                            if segment in fil.lower():
+                                asset_window[fil].Update(button_color="#cc6479")
+                            else:
+                                asset_window[fil].Update(button_color="#6a759b")
                         
-                        if column == "FILTER":
-                            
-                            # asset_window.close()
-                            saved_window.hide()
-                            segment=val["New_Asset"].lower()
-                            filtered = [fil for fil in assets if segment in fil.lower()]
-                            
-                            #filtered.sort(key=lambda strings: len(strings), reverse=True)
-                            if close_filter_window:
-                                asset_window.close()
-                            asset_window = asset_select_window(filtered, 6,hide=False)
-                            close_filter_window=True
-                            # asset_window.UnHide()
+                        # if column == "FILTER" or "Return" in column or column == "\r":
+                        #     segment=val["New_Asset"].lower()
+                        #     for fil in assets :
+                        #         if segment in fil.lower():
+                        #             asset_window[fil].Update(button_color="#cc6479")
+                        #         else:
+                        #             asset_window[fil].Update(button_color="#6a759b")
 
-
-                        elif column == "ADD_NEW_ASSET":
+                        if column == "ADD_NEW_ASSET":
                             data[val["New_Asset"]] = 9900
                             asset_window.close()
                             assets.append(val["New_Asset"])
-                            assets.sort(key=lambda strings: len(strings), reverse=True)
+                            assets.sort(key=lambda strings: strings.replace("_End","").replace("Bad_","").replace("_Start",""))
                             asset_window = asset_select_window(assets, 6,hide=False)
-                            saved_window = asset_window
-                            # asset_window.UnHide()
 
-
-
-                        else:
+                        elif column  in assets or column == "-WINDOW CLOSE ATTEMPTED-":
                            
                             if column != "-WINDOW CLOSE ATTEMPTED-":
                                 PREV_SELECTED_ASSET = column
-                            if close_filter_window:
-                                asset_window.close()
-                            asset_window = saved_window
+
                             asset_window.hide()
-                            # asset_window = asset_select_window(assets, 6)
                             break
+                        
                     # asset_window.hide()
                     if column == "-WINDOW CLOSE ATTEMPTED-":
                         continue
