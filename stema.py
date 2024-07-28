@@ -288,16 +288,23 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                 
                 if event == 'Add Data' or 'alt_l' in event.lower():
                     asset_window.UnHide()
+                    saved_window = asset_window
+                    close_filter_window =False
                     while True:
                         column, val = asset_window.read()
                         
                         if column == "FILTER":
                             
-                            asset_window.close()
-                            filtered = [fil for fil in assets if val["New_Asset"].lower() in fil.lower()]
+                            # asset_window.close()
+                            saved_window.hide()
+                            segment=val["New_Asset"].lower()
+                            filtered = [fil for fil in assets if segment in fil.lower()]
                             
-                            filtered.sort(key=lambda strings: len(strings), reverse=True)
+                            #filtered.sort(key=lambda strings: len(strings), reverse=True)
+                            if close_filter_window:
+                                asset_window.close()
                             asset_window = asset_select_window(filtered, 6,hide=False)
+                            close_filter_window=True
                             # asset_window.UnHide()
 
 
@@ -307,6 +314,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                             assets.append(val["New_Asset"])
                             assets.sort(key=lambda strings: len(strings), reverse=True)
                             asset_window = asset_select_window(assets, 6,hide=False)
+                            saved_window = asset_window
                             # asset_window.UnHide()
 
 
@@ -315,8 +323,11 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                            
                             if column != "-WINDOW CLOSE ATTEMPTED-":
                                 PREV_SELECTED_ASSET = column
-                            asset_window.close()
-                            asset_window = asset_select_window(assets, 6)
+                            if close_filter_window:
+                                asset_window.close()
+                            asset_window = saved_window
+                            asset_window.hide()
+                            # asset_window = asset_select_window(assets, 6)
                             break
                     # asset_window.hide()
                     if column == "-WINDOW CLOSE ATTEMPTED-":
