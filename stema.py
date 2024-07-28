@@ -321,7 +321,8 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                            
                             if column != "-WINDOW CLOSE ATTEMPTED-":
                                 PREV_SELECTED_ASSET = column
-
+                            for fil in assets :
+                                asset_window[fil].Update(button_color="#6a759b")
                             asset_window.hide()
                             break
                         
