@@ -271,6 +271,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                 linear = linear_data(data,total_frames,w)
                 lin=set(config["linear"])
                 run =  Task(CSV,cap,cap2,w,h,vname,total_frames,linear)
+                save_json(data, CSV)
 
 
 

@@ -100,6 +100,14 @@ def linear_data(data,total_frames,width):
 
         addkey(data,("flag",assets,'0'),0)
         addkey(data,("flag",assets,'1'),0)
+
+        if assets not in data:
+            data[assets]=9900
+        if assets+"_Start" not in data:
+            data[assets+"_Start"]=0
+        if assets+"_End" not in data:
+            data[assets+"_End"]=0
+
     for frame in range(0,total_frames,2):
         
         addkey(data,[str(frame)],{})
