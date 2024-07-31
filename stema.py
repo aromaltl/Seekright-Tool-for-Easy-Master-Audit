@@ -255,6 +255,9 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
 
                 if str(output_frame) not in data:
                     data[str(output_frame)] = {}
+                    
+                linear = linear_data(data,total_frames,w)
+                lin=set(config["linear"])
                 assets = []
                 for x in data:
                     try:
@@ -268,8 +271,6 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                 window['Delete_drop'].Update(values=drop_down_list(output_frame, data))
 
                 stream = True
-                linear = linear_data(data,total_frames,w)
-                lin=set(config["linear"])
                 run =  Task(CSV,cap,cap2,w,h,vname,total_frames,linear)
                 save_json(data, CSV)
 
