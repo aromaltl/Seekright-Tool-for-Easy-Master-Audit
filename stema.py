@@ -232,10 +232,12 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
         # print(ip)
         if event == 'Submit Videos' or  auto_start:
             
-            if ip is None:
-                ip = values['-IN-']
-            if CSV  is None:
-                CSV = values['CSV']
+            # if ip is None:
+            #     ip = values['-IN-']
+            # if CSV  is None:
+            #     CSV = values['CSV']
+            ip = values['-IN-']
+            CSV = values['CSV']
             if CSV is not None:
                 data = load_json(CSV)
             
@@ -279,8 +281,9 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
         if event == 'STOP':
             stream = False
             output_frame = 0
-
-            ip = ''
+            asset_window.close()
+            # ip = None
+            # CSV = None
             img = cv2.imread('seek.png')
             imgbytes = cv2.imencode('.png', img)[1].tobytes()
             window['image'].update(data=imgbytes)
