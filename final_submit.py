@@ -260,7 +260,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
             draw_bounding_box(image, (current[3][0], current[3][1], current[4][0], current[4][1]), labels=[label],
                               color='green')
         if event == 'Far Asset' or 'alt_l' in event.lower():
-            data["Assets"][index][6]=(data["Assets"][index][6]+1)%2
+            data["Assets"][index][6]=(data["Assets"][index][6]+5)%20
             save_json(data, json)
 
         if event == "Replace Image":
@@ -282,7 +282,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
         comment.update(value=current[5][0], text_color='Yellow')
         remark.update(value=current[5][1], text_color='Yellow')
         total.update(value=f" Total :{total_assets}")
-        far_asset.update(value= str(bool(data["Assets"][index][6])),text_color='Yellow')
+        far_asset.update(value= str(data["Assets"][index][6])+" m",text_color='Yellow')
         Input.update(value=output_frame)
         image = cv2.resize(image, (1280, 720))
         new_pos.update(value=current[7])
