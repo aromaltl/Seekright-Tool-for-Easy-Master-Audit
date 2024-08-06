@@ -236,8 +236,10 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
             #     ip = values['-IN-']
             # if CSV  is None:
             #     CSV = values['CSV']
-            ip = values['-IN-']
-            CSV = values['CSV']
+            if len(values['-IN-']) > 4 :
+                ip = values['-IN-']
+            if  len(values['CSV']) > 4: 
+                CSV = values['CSV']
             if CSV is not None:
                 data = load_json(CSV)
             
