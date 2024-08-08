@@ -179,7 +179,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
                 
                 for each in  data["Assets"]:
                     if len(each)==6:
-                        each.append(0)
+                        each.append(7)
                     if len(each) == 7:
                         each.append(each[2])
                 total_assets = len(data["Assets"])
