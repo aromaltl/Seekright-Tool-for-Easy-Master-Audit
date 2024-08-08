@@ -260,7 +260,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
             draw_bounding_box(image, (current[3][0], current[3][1], current[4][0], current[4][1]), labels=[label],
                               color='green')
         if event == 'Far Asset' or 'alt_l' in event.lower():
-            data["Assets"][index][6]=(data["Assets"][index][6]+5)%20
+            data["Assets"][index][6]=max(7,(data["Assets"][index][6]+5)%24)
             save_json(data, json)
 
         if event == "Replace Image":
@@ -306,3 +306,5 @@ def final_verify(ip=None, json=None, stream=False,index=0):
 
 if __name__ == "__main__":
     final_verify()
+
+
