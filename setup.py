@@ -1,7 +1,11 @@
 from setuptools import setup, Extension
 import os
-import pybind11
+try:
+    import pybind11
+except:
+    os.system("pip3 install pybind11")
 import glob
+import pybind11
 # Define the extension module
 ext_modules = [
     Extension(
@@ -21,3 +25,4 @@ setup(
     # and other settings to build the extension module.
     install_requires=open('requirements.txt').read().splitlines(),
 )
+#python3 setup.py build_ext --inplace
