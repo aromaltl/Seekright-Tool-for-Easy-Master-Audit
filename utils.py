@@ -54,7 +54,8 @@ def linear_remove(data,asset,side,st,w):
 try:
     import jetils
     addkeys = jetils.addkeys
-except:
+except Exception as ex:
+    print(ex)
     def addkeys(data,keys,val):
         temp = data
         found =True
@@ -649,7 +650,8 @@ class Task:
             return
 
             
-        except:
+        except Exception as ex:
+            print(ex)
             pass
 
 
