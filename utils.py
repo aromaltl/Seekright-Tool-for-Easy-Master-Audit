@@ -6,6 +6,7 @@ import time
 from opencv_draw_annotation import draw_bounding_box
 import json
 
+
 with open("config.yaml","r") as f:
     config = yaml.safe_load(f.read())
 
@@ -50,7 +51,21 @@ def linear_remove(data,asset,side,st,w):
         
         
     
-
+try:
+    import jetils
+    addkeys = jetils.addkeys
+except:
+    def addkeys(data,keys,val):
+        temp = data
+        found =True
+        for x in keys:
+            if x not in temp:
+                temp[x]={}
+                found = False
+            tt = temp
+            temp=temp[x]
+        if not found:
+            tt[keys[-1]]=val
 
 
 # added
@@ -70,17 +85,8 @@ def linear_remove(data,asset,side,st,w):
 #     cap.set(1,int(total_frames/2)*2 - 2)
 #     return int(total_frames/2)*2 - 2
 
-def addkey(data,keys,val):
-    temp = data
-    found =True
-    for x in keys:
-        if x not in temp:
-            temp[x]={}
-            found = False
-        tt = temp
-        temp=temp[x]
-    if not found:
-        tt[keys[-1]]=val
+
+
         
 def addBBox(im, frameNo, data):
     if str(frameNo) not in data:
@@ -98,8 +104,8 @@ def linear_data(data,total_frames,width):
     linear = {"asset":{}}
     for assets in lin:
 
-        addkey(data,("flag",assets,'0'),0)
-        addkey(data,("flag",assets,'1'),0)
+        addkeys(data,("flag",assets,'0'),0)
+        addkeys(data,("flag",assets,'1'),0)
 
         if assets not in data:
             data[assets]=9900
@@ -110,20 +116,20 @@ def linear_data(data,total_frames,width):
 
     for frame in range(0,total_frames,2):
         
-        addkey(data,[str(frame)],{})
+        addkeys(data,[str(frame)],{})
         # if str(frame) not in data:
         #     data[str(frame)]={}
         for asset in data[str(frame)]:
             if asset not in lin:
                 continue
-            addkey(linear["asset"],[asset],{})
+            addkeys(linear["asset"],[asset],{})
             # if asset not in linear["asset"]:
             #     linear["asset"]={asset:{}}
             
             for ids in data[str(frame)][asset]:
                 if int(ids[0]) < 9000: 
                     side =  '1' if ((ids[1][0]+ids[2][0])//2) > width//2 else '0'
-                    addkey(linear["asset"][asset],(ids[0],side),[frame,frame])
+                    addkeys(linear["asset"][asset],(ids[0],side),[frame,frame])
                     linear["asset"][asset][ids[0]][side][1]=frame
            
     # print(linear)
@@ -637,6 +643,14 @@ class Task:
         # if "_End" in asset or  "Start" in asset: ## update flag if manually added linear deleted
         #     side =  1 if ((ids[1][0]+ids[2][0])//2) > self.video_size[0]//2 else 0
         #     data["flag"][asset][side]=(data["flag"][asset][side]+1)%2
+        try:
+            import jetils
+            jetils.removeAsset( data,output_frame,delete_val[1],delete_val[0], self.total_frames)
+            return
+
+            
+        except:
+            pass
 
 
         found = 25
