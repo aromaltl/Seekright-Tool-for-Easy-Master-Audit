@@ -1,4 +1,8 @@
 *.csv
 *.json
 */
+!/srcs/*
 !/nlohmann/*.hpp
+*.MP4
+*.csv
+
