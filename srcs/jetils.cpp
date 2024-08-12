@@ -12,10 +12,12 @@ namespace py = pybind11;
 
 
 
-void add_keys(py::dict & data, py::list & keys, py::object& obj){
+void add_keys(py::dict & data, py::object& keyss, py::object& obj){
 	int i=0;
-	int size = static_cast<int>(keys.size());
+	
 	bool added = false;
+	py::list keys = keyss.cast<py::list>();
+	int size = static_cast<int>(keys.size());
 	if (size <1) return;
 	while (i < size-1){
 		if (!data.contains(keys[i])){
