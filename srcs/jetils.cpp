@@ -1,11 +1,12 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> 
 #include <iostream>
-#include <pybind11/stl_bind.h>
+//#include <pybind11/stl_bind.h>
 
-PYBIND11_MAKE_OPAQUE(std::vector<int>);
-PYBIND11_MAKE_OPAQUE(std::map<std::string, double>);
+// PYBIND11_MAKE_OPAQUE(std::vector<int>);
+// PYBIND11_MAKE_OPAQUE(std::map<std::string, double>);
 //#include <Python.h>
+// PYBIND11_MAKE_OPAQUE(std::unordered_set<std::string> )
 
 namespace py = pybind11;
 
@@ -91,8 +92,9 @@ void removeAsset(py::dict & data,int frame_no,std::string & asset,std::string & 
 
 
 PYBIND11_MODULE(jetils, m) {
-py::bind_vector<std::vector<int>>(m, "VectorInt");
-py::bind_map<std::map<std::string, double>>(m, "MapStringDouble");
+// py::bind_vector<std::vector<std::>>(m, "VectorInt");
+// py::bind_map<std::map<std::string, double>>(m, "MapStringDouble");
+// py::bind_set(std::unordered_set<std::string>);
    m.def("removeAsset", &removeAsset, "A function that prints a Python dictionary");
    m.def("add_keys",&add_keys,"add_keys");
 }
