@@ -305,7 +305,12 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                         segment=val["New_Asset"].lower()
                         for fil in assets :
                             if segment in fil.lower():
-                                asset_window[fil].Update(button_color="#cc6479")
+                                if "End" in fil:
+                                    asset_window[fil].Update(button_color="#A35060")
+                                elif "Start" in fil:
+                                    asset_window[fil].Update(button_color="#D68393")
+                                else:
+                                    asset_window[fil].Update(button_color="#cc6479")
                             else:
                                 asset_window[fil].Update(button_color="#6a759b")
                         
