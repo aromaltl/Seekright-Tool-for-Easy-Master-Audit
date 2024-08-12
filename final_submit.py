@@ -25,6 +25,7 @@ Error = sg.Text()
 Asset = sg.Text()
 
 REMARK = ['Bent', 'Broken', 'Missing', 'Plant Overgrown', 'Paint Worn Off', 'Dirt', 'Not Working', 'Others']
+default_push = (7,17,20,25)
 # config["remarks"].sort()
 # config["comment"].sort()
 
@@ -122,7 +123,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
              [sg.Text('Comment ', size=(18, 1)), sg.InputCombo([], size=(38, 60), key='comment')],
              [sg.Text('Remark ', size=(18, 1)), sg.InputCombo([], size=(38, 60), key='remark')],
              [sg.Button('Add Info', size=(15, 1))],
-             [sg.Button('Replace Image', size=(15, 1)),sg.Button('Far Asset', size=(15, 1)),far_asset],
+             [sg.Button('Replace Image', size=(15, 1)),sg.Button('Far Asset', size=(15, 1)),sg.InputCombo([], size=(4, 4), key='push'),far_asset],
              [sg.InputCombo([], size=(15, 7), key='New Pos'),sg.Button('Update Pos', size=(15, 1)),new_pos],
 
              [sg.Text('Current Asset: '), Asset],
@@ -152,6 +153,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
     # index = 0
     output_frame = 0
     prev_asset=""
+    push_ind =0
     while True:
         event, values = window.read()
         # print(event,values)
@@ -260,7 +262,12 @@ def final_verify(ip=None, json=None, stream=False,index=0):
             draw_bounding_box(image, (current[3][0], current[3][1], current[4][0], current[4][1]), labels=[label],
                               color='green')
         if event == 'Far Asset' or 'alt_l' in event.lower():
-            data["Assets"][index][6]=max(7,(data["Assets"][index][6]+5)%24)
+            # data["Assets"][index][6]=max(7,(data["Assets"][index][6]+5)%24)
+            if  len(values['push']):
+                data["Assets"][index][6]= int(values['push'])
+            else:
+                data["Assets"][index][6]=default_push[push_ind]
+                push_ind=(push_ind+1)%(len(default_push))
             save_json(data, json)
 
         if event == "Replace Image":
