@@ -7,4 +7,4 @@ pytz
 six
 tzdata
 PyYAML
-./PySimpleGUI-4.60.5.tar.gz
+PySimpleGUI-4.60.5.tar.gz
