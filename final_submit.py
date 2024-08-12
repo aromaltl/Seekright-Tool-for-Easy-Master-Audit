@@ -25,7 +25,7 @@ Error = sg.Text()
 Asset = sg.Text()
 
 REMARK = ['Bent', 'Broken', 'Missing', 'Plant Overgrown', 'Paint Worn Off', 'Dirt', 'Not Working', 'Others']
-default_push = (7,17,20,25)
+default_push = (7,10,15,17,20,25,30)
 # config["remarks"].sort()
 # config["comment"].sort()
 
@@ -261,7 +261,15 @@ def final_verify(ip=None, json=None, stream=False,index=0):
 
             draw_bounding_box(image, (current[3][0], current[3][1], current[4][0], current[4][1]), labels=[label],
                               color='green')
-        if event == 'Far Asset' or 'alt_l' in event.lower():
+        if 'up' in event.lower():
+            push_ind=(push_ind+1)%(len(default_push))
+            data["Assets"][index][6]=default_push[push_ind]
+            
+        if 'down' in event.lower():
+            push_ind=(push_ind-1) if push_ind>0 else (len(default_push)-1)
+            data["Assets"][index][6]=default_push[push_ind]
+            
+        if event == 'Far Asset' :
             # data["Assets"][index][6]=max(7,(data["Assets"][index][6]+5)%24)
             if  len(values['push']):
                 data["Assets"][index][6]= int(values['push'])
