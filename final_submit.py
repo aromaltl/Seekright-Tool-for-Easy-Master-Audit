@@ -264,11 +264,11 @@ def final_verify(ip=None, json=None, stream=False,index=0):
         if 'up' in event.lower():
             push_ind=(push_ind+1)%(len(default_push))
             data["Assets"][index][6]=default_push[push_ind]
-            
+            save_json(data, json)
         if 'down' in event.lower():
             push_ind=(push_ind-1) if push_ind>0 else (len(default_push)-1)
             data["Assets"][index][6]=default_push[push_ind]
-            
+            save_json(data, json)
         if event == 'Far Asset' :
             # data["Assets"][index][6]=max(7,(data["Assets"][index][6]+5)%24)
             if  len(values['push']):
