@@ -261,11 +261,11 @@ def final_verify(ip=None, json=None, stream=False,index=0):
 
             draw_bounding_box(image, (current[3][0], current[3][1], current[4][0], current[4][1]), labels=[label],
                               color='green')
-        if 'up' in event.lower():
+        if 'up:' in event.lower():
             push_ind=(push_ind+1)%(len(default_push))
             data["Assets"][index][6]=default_push[push_ind]
             save_json(data, json)
-        if 'down' in event.lower():
+        if 'down:' in event.lower():
             push_ind=(push_ind-1) if push_ind>0 else (len(default_push)-1)
             data["Assets"][index][6]=default_push[push_ind]
             save_json(data, json)
