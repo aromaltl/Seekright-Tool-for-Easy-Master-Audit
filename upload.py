@@ -69,7 +69,7 @@ def generate(cap, data, video_name):
                 Asset = "LEFT_" + asset
             # print(ids)
             # name , id, frame , x1y1 , x2y2,[], frame_new
-            push_meters = 12 if 'ight' in asset else 7
+            push_meters = 8 if 'ight' in asset else 5
             final_json["Assets"].append([Asset, int(ids), int(val[0]), val[1], val[2], ['', ''],push_meters,int(val[0])])
             # cap.set(1, int(val[0]))
             # ret, frame = cap.read()
