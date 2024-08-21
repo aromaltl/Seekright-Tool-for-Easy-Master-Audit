@@ -25,7 +25,7 @@ Error = sg.Text()
 Asset = sg.Text()
 
 REMARK = ['Bent', 'Broken', 'Missing', 'Plant Overgrown', 'Paint Worn Off', 'Dirt', 'Not Working', 'Others']
-default_push = (3, 5, 13)
+default_push = (3,5,7,10,13,15,17,20,22,25,30)
 # config["remarks"].sort()
 # config["comment"].sort()
 
