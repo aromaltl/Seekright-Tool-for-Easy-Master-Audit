@@ -155,6 +155,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
     prev_asset=""
     push_ind =0
     while True:
+        
         event, values = window.read()
         # print(event,values)
         if event == 'BACK' or event == sg.WIN_CLOSED:
@@ -212,10 +213,12 @@ def final_verify(ip=None, json=None, stream=False,index=0):
             index = min(index + 1, total_assets - 1)
             current = copy.deepcopy(data["Assets"][index])
             output_frame = current[2]
+            push_ind=0
         if event == 'Previous Asset'  or 'Left:' in event:
             index = max(0, index - 1)
             current = copy.deepcopy(data["Assets"][index])
             output_frame = current[2]
+            push_ind=0
         if event == 'Previous Frame':
             output_frame = output_frame - 2
         if event == "Next Frame" :
