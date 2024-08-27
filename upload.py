@@ -60,17 +60,27 @@ def generate(cap, data, video_name):
             nth_last = config["det_loc"]['light_nth_last']
         if asset in config["det_loc"]:
             nth_last= config["det_loc"][asset]
-
+        # val = data[asset][ids][0]
         for ids in data[asset]:
-            val = data[asset][ids][-min(nth_last, len(data[asset][ids]))]
+            if len(data[asset][ids])==0:
+                continue
+            val = data[asset][ids][0]
+            for ijk in data[asset][ids][::-1]:
+                # val=ijk
+                if ijk[1][0]>15 and ijk[1][1]>15 and ijk[2][0]< width-15 and ijk[2][1] < height-15:
+                    val=ijk
+                    break
+            # val = data[asset][ids][-min(nth_last, len(data[asset][ids]))]
+            last = data[asset][ids][-1]
+
             if (val[1][0] + val[2][0]) / 2 > width / 2:
                 Asset = "RIGHT_" + asset
             else:
                 Asset = "LEFT_" + asset
             # print(ids)
             # name , id, frame , x1y1 , x2y2,[], frame_new
-            push_meters = 12 if 'ight' in asset else 7
-            final_json["Assets"].append([Asset, int(ids), int(val[0]), val[1], val[2], ['', ''],push_meters,int(val[0])])
+            push_meters = 10 if 'ight' in asset else 7
+            final_json["Assets"].append([Asset, int(ids), int(val[0]), val[1], val[2], ['', ''], push_meters, int(last[0])])
             # cap.set(1, int(val[0]))
             # ret, frame = cap.read()
             # draw_bounding_box(frame, (val[1][0], val[1][1], val[2][0], val[2][1]), labels=[asset], color='green')
