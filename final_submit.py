@@ -25,6 +25,7 @@ Error = sg.Text()
 Asset = sg.Text()
 
 REMARK = ['Bent', 'Broken', 'Missing', 'Plant Overgrown', 'Paint Worn Off', 'Dirt', 'Not Working', 'Others']
+default_push = (3,5,7,10,13,15,17,20,22,25,30)
 # config["remarks"].sort()
 # config["comment"].sort()
 
@@ -100,6 +101,8 @@ def load_json(CSV):
 
 # assets_list = [(x,i,j) for x in range(len())]
 
+
+
 def final_verify(ip=None, json=None, stream=False,index=0):
     col11 = sg.Image(key='image')
     Output = sg.Text()
@@ -122,7 +125,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
              [sg.Text('Comment ', size=(18, 1)), sg.InputCombo([], size=(38, 60), key='comment')],
              [sg.Text('Remark ', size=(18, 1)), sg.InputCombo([], size=(38, 60), key='remark')],
              [sg.Button('Add Info', size=(15, 1))],
-             [sg.Button('Replace Image', size=(15, 1)),sg.Button('Far Asset', size=(15, 1)),far_asset],
+             [sg.Button('Replace Image', size=(15, 1)),sg.Button('Far Asset', size=(15, 1)),sg.InputCombo([], size=(4, 4), key='push'),far_asset],
              [sg.InputCombo([], size=(15, 7), key='New Pos'),sg.Button('Update Pos', size=(15, 1)),new_pos],
 
              [sg.Text('Current Asset: '), Asset],
@@ -152,7 +155,10 @@ def final_verify(ip=None, json=None, stream=False,index=0):
     # index = 0
     output_frame = 0
     prev_asset=""
+    push_ind =0
+    frame_toggle = 2
     while True:
+        
         event, values = window.read()
         # print(event,values)
         if event == 'BACK' or event == sg.WIN_CLOSED:
@@ -210,16 +216,21 @@ def final_verify(ip=None, json=None, stream=False,index=0):
             index = min(index + 1, total_assets - 1)
             current = copy.deepcopy(data["Assets"][index])
             output_frame = current[2]
+            push_ind=0
         if event == 'Previous Asset'  or 'Left:' in event:
             index = max(0, index - 1)
             current = copy.deepcopy(data["Assets"][index])
             output_frame = current[2]
+            push_ind=0
         if event == 'Previous Frame':
             output_frame = output_frame - 2
         if event == "Next Frame" :
             output_frame = output_frame + 2
 
-
+        if 'shift' in event.lower():
+            frame_toggle = 2  if frame_toggle == 7 else 7
+            # print(frame_toggle,current)
+            output_frame = int(current[frame_toggle])
 
         cap.set(1, output_frame)
 
@@ -255,12 +266,30 @@ def final_verify(ip=None, json=None, stream=False,index=0):
             save_json(data, json)
 
         if current[2] == output_frame:
-            label = current[0].replace("RIGHT_", "").replace("LEFT_", "")
 
+            label = current[0].replace("RIGHT_", "").replace("LEFT_", "")
             draw_bounding_box(image, (current[3][0], current[3][1], current[4][0], current[4][1]), labels=[label],
-                              color='green')
-        if event == 'Far Asset' or 'alt_l' in event.lower():
-            data["Assets"][index][6]=max(7,(data["Assets"][index][6]+5)%24)
+                color='green')
+        elif current[7] == output_frame:
+
+            draw_bounding_box(image, (current[3][0], current[3][1], current[3][0]+5, current[3][1]+5), labels=["NEAREST_FRAME"],
+                color='red')
+
+        if 'up:' in event.lower():
+            push_ind=(push_ind+1)%(len(default_push))
+            data["Assets"][index][6]=default_push[push_ind]
+            save_json(data, json)
+        if 'down:' in event.lower():
+            push_ind=(push_ind-1) if push_ind>0 else (len(default_push)-1)
+            data["Assets"][index][6]=default_push[push_ind]
+            save_json(data, json)
+        if event == 'Far Asset' :
+            # data["Assets"][index][6]=max(7,(data["Assets"][index][6]+5)%24)
+            if  len(values['push']):
+                data["Assets"][index][6]= int(values['push'])
+            else:
+                data["Assets"][index][6]=default_push[push_ind]
+                push_ind=(push_ind+1)%(len(default_push))
             save_json(data, json)
 
         if event == "Replace Image":
