@@ -238,6 +238,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
 
         if event == "Replace Image":
             cv2.namedWindow("select the area", cv2.WINDOW_NORMAL)
+            cv2.setWindowProperty("select the area", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
             r = cv2.selectROI("select the area", image)
             cv2.destroyWindow("select the area")
 
