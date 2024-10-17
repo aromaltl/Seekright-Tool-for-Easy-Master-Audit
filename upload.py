@@ -109,15 +109,26 @@ def generate(cap, data, video_name):
     print("finished")
 
 
-def confirmation(CONFIRMATION):
+def confirmation(CONFIRMATION,data=None):
     Input = sg.Text(font=("Arial", 20), justification='center')
     layout = [[sg.Button("Confirm", size=(12, 2), pad=(50, 40), font=("Arial", 20)),
                sg.Button("Cancel", size=(12, 2), pad=(50, 40), font=("Arial", 20))], [Input]]
     # layout=sg.Column(layout, scrollable=True,  vertical_scroll_only=True)
     win = sg.Window(CONFIRMATION, layout, finalize=True, enable_close_attempted_event=True,
                     element_justification='c')
+    
+    if data is not None:
+        for ast in data["flag"]:
+            for side in data["flag"][ast]:
+                if data["flag"][ast][side]%2==1:
+                    Input.update(value=f"Not closed !!! >> {ast} {'Right' if side == 1 else 'Left' } !!!",text_color='Red')
+                    # for x in range(total-1,-1,-1):
+
+                    break
+        
+    else:
+        Input.update(value=f"File looks good. Can i confirm ???")
     event = win.read()[0]
-    Input.update(value=f"{CONFIRMATION}ing Please Wait !!!!")
     win["Confirm"].update(disabled=True)
     win["Cancel"].update(disabled=True)
     win.read(timeout=0.1)

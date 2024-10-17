@@ -411,7 +411,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                 Shift = not Shift
 
             if event == "Generate":
-                CONFIRM, wait = confirmation("Generate")
+                CONFIRM, wait = confirmation("Generate",data=data)
                 if CONFIRM:
                     asset_format = converting_to_asset_format(data, total_frames)
                     generate(cap, asset_format, ip)
