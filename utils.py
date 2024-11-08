@@ -18,6 +18,28 @@ def save_json(data, CSV):
         json.dump(data, outfile)
 
 
+def remove_left_lights(data,cap):
+    width  = int(cap.get(3)//2)  # float `width`
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    for x in range(total_frames):
+        if x % 2 == 1:
+            continue
+        x = str(x)
+        if x not in data:
+            data[x] = {}
+        if 'Street_Light' not in data[x]:
+            continue
+        temp = []
+        for yy in data[x]['Street_Light']:
+            if ((yy[1][0]+yy[2][0])//2)>width:
+                temp.append(yy)
+        data[x]['Street_Light'] = temp
+                
+
+
+
+
 def linear_remove(data,asset,side,st,w):
     '''
     remove linear assets till verified frame , 

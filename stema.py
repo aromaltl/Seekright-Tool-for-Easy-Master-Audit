@@ -14,7 +14,7 @@ with open("config.yaml","r") as f:
 
 from upload import converting_to_asset_format, generate, confirmation
 from final_submit import final_verify
-from utils import mouse_call, extract_for_annotations, linear_data, addBBox, linear_remove
+from utils import mouse_call, extract_for_annotations, linear_data, addBBox, linear_remove, remove_left_lights
 from utils import Task
 
 """
@@ -159,7 +159,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
              [sg.Button('Delete Data', size=(15, 1)), sg.InputCombo([], size=(40, 4), key='Delete_drop'),
               sg.Button('Select')],
              [sg.Text('NAVIGATE')],
-             [sg.Button('START', size=(15, 1)), sg.Button('STOP', size=(15, 1))],
+             [sg.Button('START', size=(15, 1)), sg.Button('STOP', size=(15, 1)),sg.Button('RemoveLeft', size=(15, 1))],
 
              [sg.Button('PREVIOUS', size=(15, 1)), sg.Button('NEXT', size=(15, 1))],
              [sg.Button('Generate'), sg.Text('<-Generate final json', size=(35, 1))],
@@ -256,7 +256,6 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                 vname = os.path.basename(ip).split(".")[0]
                 total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
                 window["slider"].update(range=(0, total_frames - 1))
-
                 if str(output_frame) not in data:
                     data[str(output_frame)] = {}
                     
@@ -376,7 +375,13 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                 save_json(data, CSV)
                 window['Delete_drop'].Update(values=drop_down_list(output_frame, data))
 
-                
+            if event == 'RemoveLeft':
+                os.makedirs(f"DeletedImages/{vname}" ,exist_ok =True)
+                if not os.path.exists(f"DeletedImages/{vname}/backup.json"):
+                    save_json(data,f"DeletedImages/{vname}/backup.json")
+                remove_left_lights(data,cap)
+                save_json(data,CSV)
+                    
 
             if event == 'SAVE FRAME' or letter == 83:
                 ret = cap.set(cv2.CAP_PROP_POS_FRAMES, output_frame)
