@@ -347,6 +347,10 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                 cv2.namedWindow("select the area", cv2.WINDOW_NORMAL)
 
                 ret, frame = cap.read()
+                if not ret:
+                    frame =np.zeros((h,w,3),np.uint8)
+
+                cv2.imshow('select the area',frame)
                 # cv2.setWindowProperty("select the area", cv2.WND_PROP_FULLSCREEN, cv2.WND_PROP_TOPMOST)
                 cv2.setWindowProperty("select the area", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
                 # cv2.setWindowProperty("select the area", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_AUTOSIZE)
@@ -386,6 +390,8 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
             if event == 'SAVE FRAME' or letter == 83:
                 ret = cap.set(cv2.CAP_PROP_POS_FRAMES, output_frame)
                 ret, frame = cap.read()
+                if not ret:
+                    frame =np.zeros((h,w,3),np.uint8)
                 frame = addBBox(frame, output_frame, data)
                 cv2.imwrite("SavedImages/" + os.path.basename(ip) + '_' + str(output_frame) + '.jpeg', frame)
 
@@ -495,7 +501,8 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
             if event != 'NEXT' and 'Right:' not in event:
                 ret = cap.set(cv2.CAP_PROP_POS_FRAMES, output_frame)
             ret, frame = cap.read()
-
+            if not ret:
+                frame =np.zeros((h,w,3),np.uint8)
             window["slider"].update(value=output_frame)
             Input.update(value=output_frame)
             frame = addBBox(frame, output_frame, data)
