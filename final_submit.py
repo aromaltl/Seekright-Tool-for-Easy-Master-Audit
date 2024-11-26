@@ -235,6 +235,8 @@ def final_verify(ip=None, json=None, stream=False,index=0):
         cap.set(1, output_frame)
 
         ret, image = cap.read()
+        if not ret:
+            image = np.zeros((720,1280,3))
 
         if event == "Replace Image":
             cv2.namedWindow("select the area", cv2.WINDOW_NORMAL)
