@@ -177,7 +177,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
 
             save_json(data, json)
 
-        assets_name = data["asset_name"][index].replace("LEFT_","").replace("RIGHT_","")
+        assets_name = data["db_asset_name"][index].replace("LEFT_","").replace("RIGHT_","")
         bbox = data["bbox"][index]
         # img_path = data["img_path"][index]
         # db_img_path
