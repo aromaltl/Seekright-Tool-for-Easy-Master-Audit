@@ -207,7 +207,8 @@ def final_verify(ip=None, json=None, stream=False,index=0):
             window['remark'].update(values=REMARK[assets_name] if assets_name in REMARK else REMARK['default'])
             prev_asset=assets_name
 
-
+        Asset.update(value=assets_name, text_color='Yellow')
+        
         comment.update(value=data["COMMENT"][index], text_color='Yellow')
         remark.update(value=data["REMARK"][index], text_color='Yellow')
         
