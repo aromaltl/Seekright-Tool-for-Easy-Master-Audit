@@ -489,7 +489,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                     else:
                         window['Delete_drop'].Update(values=drop_down_list(output_frame, data))
                         break
-
+                cap.set(cv2.CAP_PROP_POS_FRAMES, output_frame)
                 # cv2.destroyWindow("OUT")
             # output_frame = int(output_frame // 2) * 2
             if output_frame > total_frames - 1:
