@@ -8,3 +8,7 @@ six
 tzdata
 PyYAML
 PySimpleGUI-4.60.5.tar.gz
+--index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
+torchaudio
