@@ -40,7 +40,7 @@ class classifier(torch.nn.Module):
         if not os.path.exists('best_1.pt'):
             os.system("wget https://takeleap.in/best_1.pt")
 
-        resnet34.load_state_dict(torch.load('best_1.pt'),strict=True)
+        resnet34.load_state_dict(torch.load('best_1.pt',map_location=torch.device("cpu")),strict=True)
         self.extr=torch.nn.Sequential(*[x for x in resnet34.children()][:-1])#.cuda()
     def forward(self, x):
         x = self.extr(x)
