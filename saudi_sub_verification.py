@@ -184,7 +184,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
         img_path = data["db_img_path"][index]
 
 
-        img_path = os.path.join("https://seekright.takeleap.in/SeekRight/",img_path)
+        # img_path = os.path.join("https://seekright.takeleap.in/SeekRight/",img_path)
 
 
         resp = urlopen(img_path )
