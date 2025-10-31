@@ -63,7 +63,7 @@ def asset_select_window(keys, cols,hide=True):
     
     '''
     layout = []
-    # print(keys)
+
     d = len(keys)
     r = d % cols
     keys = keys + [""] * (cols - r)
@@ -76,7 +76,6 @@ def asset_select_window(keys, cols,hide=True):
     
     win = sg.Window("Select Asset", layout, resizable=True, finalize=True, enable_close_attempted_event=True,
                     element_justification='c', return_keyboard_events=True)
-    
     if hide:
         win.hide()
     return win
@@ -159,9 +158,9 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
              [sg.Button('Delete Data', size=(15, 1)), sg.InputCombo([], size=(40, 4), key='Delete_drop'),
               sg.Button('Select')],
              [sg.Text('NAVIGATE')],
-             [sg.Button('START', size=(15, 1)), sg.Button('STOP', size=(15, 1)),sg.Button('RemoveLeft', size=(15, 1))],
+             [sg.Button('START', size=(15, 1)), sg.Button('STOP', size=(15, 1)),sg.Button('RemoveAsset', size=(15, 1))],
 
-             [sg.Button('PREVIOUS', size=(15, 1)), sg.Button('NEXT', size=(15, 1))],
+             [sg.Button('PREVIOUS', size=(15, 1)), sg.Button('NEXT', size=(15, 1)),sg.InputCombo([], size=(15, 1), key='Removefr')],
              [sg.Button('Generate'), sg.Text('<-Generate final json', size=(35, 1))],
              [sg.Button('SAVE FRAME', size=(15, 1)), sg.Button('EXIT', size=(15, 1)), sg.Text('', key='text'), Output,
               sg.Text('Frame no: '), Input]]
@@ -379,11 +378,16 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                 save_json(data, CSV)
                 window['Delete_drop'].Update(values=drop_down_list(output_frame, data))
 
-            if event == 'RemoveLeft':
+            if event == 'RemoveAsset':
                 os.makedirs(f"DeletedImages/{vname}" ,exist_ok =True)
                 if not os.path.exists(f"DeletedImages/{vname}/backup.json"):
                     save_json(data,f"DeletedImages/{vname}/backup.json")
-                remove_left_lights(data,cap)
+                asset_window.UnHide()
+                column, val = asset_window.read()
+                lrfr=values['Removefr']
+
+                remove_left_lights(data,cap,column,lrfr,output_frame)
+                asset_window.Hide()
                 save_json(data,CSV)
                     
 
@@ -497,6 +501,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                 output_frame = total_frames - 1
                 output_frame = int(output_frame // 2) * 2
                 window['Delete_drop'].Update(values=drop_down_list(output_frame, data))
+                
 
             if event != 'NEXT' and 'Right:' not in event:
                 ret = cap.set(cv2.CAP_PROP_POS_FRAMES, output_frame)

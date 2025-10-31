@@ -122,8 +122,8 @@ def final_verify(ip=None, json=None, stream=False,index=0):
              [sg.Button('Submit Video', size=(15, 1))],
              [sg.Button('START', size=(15, 1)),total],
              [sg.Text('MODIFY MASTER')],
-             [sg.Text('Comment ', size=(18, 1)), sg.InputCombo([], size=(38, 60), key='comment')],
-             [sg.Text('Remark ', size=(18, 1)), sg.InputCombo([], size=(38, 60), key='remark')],
+             [sg.Text('Comment ', size=(18, 1)), sg.InputCombo([], size=(38, 30), key='comment')],
+             [sg.Text('Remark ', size=(18, 1)), sg.InputCombo([], size=(38, 30), key='remark')],
              [sg.Button('Add Info', size=(15, 1))],
              [sg.Button('Replace Image', size=(15, 1)),sg.Button('Far Asset', size=(15, 1)),sg.InputCombo([], size=(4, 4), key='push'),far_asset],
              [sg.InputCombo([], size=(15, 7), key='New Pos'),sg.Button('Update Pos', size=(15, 1)),new_pos],
@@ -178,6 +178,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
                 # print(ip,index,output_frame,"#########")
                 video_name = os.path.basename(ip).replace('.MP4', '')
                 data = load_json(json)
+                
                 # all_assets = set([asst[0].replace("RIGHT_","").replace("LEFT_","") for asst in data["Assets"]])
 
                 data["Assets"].sort(key=sort_order)
