@@ -533,6 +533,7 @@ class Task:
         play_size = config["play_size"]
         lin = set(config["linear"])
         cv2.namedWindow("OUT", cv2.WND_PROP_FULLSCREEN)
+        time.sleep(0.07)
         cv2.setWindowProperty("OUT", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         del_ast = mouse_call(self.w,self.h)
         cv2.setMouseCallback('OUT',  del_ast.mclbk)
