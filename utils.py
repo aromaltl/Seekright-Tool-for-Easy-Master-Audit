@@ -21,23 +21,34 @@ def save_json(data, CSV):
 def remove_left_lights(data,cap,column,lrfr,current_frame):
     width  = int(cap.get(3)//2)  # float `width`
     # total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    prevframe = int(lrfr[1:]) if not lrfr[0].isdigit() else int(lrfr)
+    for x in range(current_frame,prevframe-1,-2):
+        if x % 2 == 0:
 
-    for x in range(current_frame,int(lrfr[1:])-1,-1):
-        if x % 2 == 1:
-            continue
-        x = str(x)
-        if x not in data:
-            data[x] = {}
-        if column not in data[x]:
-            continue
-        temp = []
-        for yy in data[x][column]:
-            if ((yy[1][0]+yy[2][0])//2)>width and lrfr[0].lower() == 'l':
-                temp.append(yy)
-            if ((yy[1][0]+yy[2][0])//2)<width and lrfr[0].lower() == 'r':
-                temp.append(yy)
-        data[x][column] = temp
+            x = str(x)
+            
+            
+            if x not in data:
+                data[x] = {}
+            if column =="SELECTALL":
+                del data[x]
+                continue
+            
+            if column not in data[x] :
+                continue
+            if lrfr[0].isdigit():
+                del data[x][column]
+                continue
+            temp = []
+            for yy in data[x][column]:
+
+                if ((yy[1][0]+yy[2][0])//2)>width and lrfr[0].lower() == 'l':
+                    temp.append(yy)
+                if ((yy[1][0]+yy[2][0])//2)<width and lrfr[0].lower() == 'r':
+                    temp.append(yy)
                 
+            data[x][column] = temp
+                    
 
 
 

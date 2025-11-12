@@ -71,10 +71,10 @@ def asset_select_window(keys, cols,hide=True):
     
     for hh in range(n):
         layout.append([sg.Button(keys[x + hh * cols], size=(32, 1), pad=(0, 0)) for x in range(cols)])
-
+    layout.append([sg.Button("SELECTALL", size=(32, 1),button_color='red', pad=(0, 0))])
     layout.append([sg.InputText('', key='New_Asset', size=(58, 1)) ,sg.Button('ADD_NEW_ASSET', size=(18, 1))])  # ,
     
-    win = sg.Window("Select Asset", layout, resizable=True, finalize=True, enable_close_attempted_event=True,
+    win = sg.Window("Select Asset", layout, resizable=True, keep_on_top=True, finalize=True, enable_close_attempted_event=True,
                     element_justification='c', return_keyboard_events=True)
     if hide:
         win.hide()
@@ -380,8 +380,10 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
 
             if event == 'RemoveAsset':
                 os.makedirs(f"DeletedImages/{vname}" ,exist_ok =True)
-                if not os.path.exists(f"DeletedImages/{vname}/backup.json"):
-                    save_json(data,f"DeletedImages/{vname}/backup.json")
+                for __ in range(10):
+                    if not os.path.exists(f"DeletedImages/{vname}/{__}backup.json"):
+                        save_json(data,f"DeletedImages/{vname}/{__}backup.json")
+                        break
                 asset_window.UnHide()
                 column, val = asset_window.read()
                 lrfr=values['Removefr']
