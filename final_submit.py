@@ -10,7 +10,7 @@ import time
 from opencv_draw_annotation import draw_bounding_box
 from upload import converting_to_asset_format, generate, confirmation
 import copy
-
+import utils
 import yaml
 with open("config.yaml","r") as f:
     config = yaml.safe_load(f.read())
@@ -240,8 +240,9 @@ def final_verify(ip=None, json=None, stream=False,index=0):
             image = np.zeros((720,1280,3))
 
         if event == "Replace Image":
-            cv2.namedWindow("select the area", cv2.WINDOW_NORMAL)
-            cv2.setWindowProperty("select the area", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+            # cv2.namedWindow("select the area", cv2.WINDOW_NORMAL)
+            # cv2.setWindowProperty("select the area", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+            utils.safe_open_window("select the area")
             r = cv2.selectROI("select the area", image)
             cv2.destroyWindow("select the area")
 

@@ -18,6 +18,15 @@ def save_json(data, CSV):
         json.dump(data, outfile)
 
 
+def safe_open_window(windowname):
+    cv2.namedWindow(windowname, cv2.WND_PROP_FULLSCREEN)
+    cv2.imshow(windowname,  np.zeros((300,300),np.uint8) )
+    for ___ in range(20):
+        cv2.waitKey(1)
+    cv2.setWindowProperty(windowname, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
+
+
 def remove_left_lights(data,cap,column,lrfr,current_frame):
     width  = int(cap.get(3)//2)  # float `width`
     # total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -532,9 +541,8 @@ class Task:
         delay = 0.008 / config['speed']
         play_size = config["play_size"]
         lin = set(config["linear"])
-        cv2.namedWindow("OUT", cv2.WND_PROP_FULLSCREEN)
-        time.sleep(0.07)
-        cv2.setWindowProperty("OUT", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
+        safe_open_window('OUT')
         del_ast = mouse_call(self.w,self.h)
         cv2.setMouseCallback('OUT',  del_ast.mclbk)
         # cap.set(1,output_frame)
@@ -671,6 +679,18 @@ class Task:
         cv2.destroyWindow("OUT")
         return True, output_frame, None,None
     
+    def break_linear(self, data,output_frame):
+        lin=set(config["linear"])
+        for asset , value in data[output_frame].items():
+            if asset in lin:
+                for ids in value:
+                    asset =asset.replace("_Start","").replace("_End","")
+                    side =  '1' if ((ids[1][0]+ids[2][0])//2) > self.w//2 else '0'
+                    
+                    data["flag"][asset][side]=(data["flag"][asset][side]+1)%2
+
+
+
 
 
     def remove_asset(self,data,output_frame ,delete_val):
