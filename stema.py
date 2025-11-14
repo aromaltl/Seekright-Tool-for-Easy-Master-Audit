@@ -160,8 +160,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                        layout, resizable=True, finalize=True, return_keyboard_events=True, use_default_focus=False)
 
     window.finalize()
-    # stream = False
-    # output_frame = 0
+
     Shift = False
     stream=False
     window_read = True
@@ -178,9 +177,6 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
         if window_read:
             event, values  =  event_t, values_t
         
-
-
-        # print((event, values))
         # print()
         if event == 'slider':
             output_frame = int(int(values['slider']) // 2) * 2
@@ -195,8 +191,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                 # print(ord(event))
                 letter = ord(event)
 
-        # if event is not None:
-        # text_el em.update(event)
+
 
         if event == 'EXIT' or event == sg.WIN_CLOSED:
             return "STOP"
@@ -238,7 +233,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                     data[str(output_frame)] = {}
                     
                 linear = linear_data(data,total_frames,w)
-                lin=set(config["linear"])
+                lin = set(config["linear"])
                 assets = []
                 for x in data:
                     try:
@@ -275,41 +270,41 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
             if event == 'Add Data' or 'alt_l' in event.lower() or 'control_l' in event.lower():
                 
                 if event == 'Add Data' or 'alt_l' in event.lower():
-                    if  SelectWindow.asset_select_window(assets,data):
-                            
-                        PREV_SELECTED_ASSET = SelectWindow.selection
-                        event = event if window_read else " "
-                        if len(PREV_SELECTED_ASSET) == 0: 
-                            continue
-                        cap.set(cv2.CAP_PROP_POS_FRAMES, output_frame)
-                        utils.safe_open_window(windowname ='select the area')
-                        ret, frame = cap.read()
-                        if not ret:
-                            frame =np.zeros((h,w,3),np.uint8)
-                        r = cv2.selectROI("select the area", frame)
-                        cv2.destroyWindow("select the area")
-                        if r[2] + r[3] < 10 :
-                            continue
-                        # if type(delete_val) is str and len(delete_val):
-                        #     addtoJSON(output_frame, PREV_SELECTED_ASSET, [(r[0], r[1]), (r[2] + r[0], r[3] + r[1])], data,
-                        #               delete_val)
-                        # else:
-                        if 1:
-                            data[PREV_SELECTED_ASSET] += 1
-                            BASE_PREV_SELECTED_ASSET = PREV_SELECTED_ASSET.replace("_Start","").replace("_End","")
-                            if BASE_PREV_SELECTED_ASSET in lin:
-                                side = '1' if  (r[0]+(r[2]//2) ) > w//2 else '0'
-                                
-                                # if data["flag"][BASE_PREV_SELECTED_ASSET][side]==1: # only at end 
-                                linear_remove(data,BASE_PREV_SELECTED_ASSET,side,output_frame,w)
-                                if PREV_SELECTED_ASSET != BASE_PREV_SELECTED_ASSET:
-                                    data["flag"][BASE_PREV_SELECTED_ASSET][side]=(data["flag"][BASE_PREV_SELECTED_ASSET][side]+1)%2
+                    if not SelectWindow.asset_select_window(assets,data):
+                        continue         
+                PREV_SELECTED_ASSET = SelectWindow.selection
+                event = event if window_read else " "
+                if len(PREV_SELECTED_ASSET) == 0: 
+                    continue
+                cap.set(cv2.CAP_PROP_POS_FRAMES, output_frame)
+                utils.safe_open_window(windowname ='select the area')
+                ret, frame = cap.read()
+                if not ret:
+                    frame =np.zeros((h,w,3),np.uint8)
+                r = cv2.selectROI("select the area", frame)
+                cv2.destroyWindow("select the area")
+                if r[2] + r[3] < 10 :
+                    continue
+                # if type(delete_val) is str and len(delete_val):
+                #     addtoJSON(output_frame, PREV_SELECTED_ASSET, [(r[0], r[1]), (r[2] + r[0], r[3] + r[1])], data,
+                #               delete_val)
+                # else:
 
-                            addtoJSON(output_frame, PREV_SELECTED_ASSET, [(r[0], r[1]), (r[2] + r[0], r[3] + r[1])], data,
-                                    data[PREV_SELECTED_ASSET])
-                        frame = addBBox(frame, output_frame, data)
-                        save_json(data, CSV)
-                        window['Delete_drop'].Update(values=drop_down_list(output_frame, data))
+                data[PREV_SELECTED_ASSET] += 1
+                BASE_PREV_SELECTED_ASSET = PREV_SELECTED_ASSET.replace("_Start","").replace("_End","")
+                if BASE_PREV_SELECTED_ASSET in lin:
+                    side = '1' if  (r[0]+(r[2]//2) ) > w//2 else '0'
+                    
+                    # if data["flag"][BASE_PREV_SELECTED_ASSET][side]==1: # only at end 
+                    linear_remove(data,BASE_PREV_SELECTED_ASSET,side,output_frame,w)
+                    if PREV_SELECTED_ASSET != BASE_PREV_SELECTED_ASSET:
+                        data["flag"][BASE_PREV_SELECTED_ASSET][side]=(data["flag"][BASE_PREV_SELECTED_ASSET][side]+1)%2
+
+                addtoJSON(output_frame, PREV_SELECTED_ASSET, [(r[0], r[1]), (r[2] + r[0], r[3] + r[1])], data,
+                        data[PREV_SELECTED_ASSET])
+                frame = addBBox(frame, output_frame, data)
+                save_json(data, CSV)
+                window['Delete_drop'].Update(values=drop_down_list(output_frame, data))
 
             if event == 'RemoveAsset':
                 os.makedirs(f"DeletedImages/{vname}" ,exist_ok =True)
@@ -378,42 +373,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
             if ("delete" in event.lower() or event == "\x7f") and len(delete_val):
                 run.remove_asset(data,output_frame,delete_val)
                 extract_for_annotations(cap2,output_frame,vname)
-                # found = 25
 
-                # for x in range(output_frame, total_frames):
-                #     if x % 2 == 1:
-                #         continue
-                #     x = str(x)
-                #     if x not in data:
-                #         data[x] = {}
-
-                #     if delete_val[1] in data[x].keys():
-
-                #         for yy in range(len(data[x][delete_val[1]])):
-                #             if delete_val[0] == data[x][delete_val[1]][yy][0]:
-                #                 data[x][delete_val[1]].pop(yy)
-                #                 found = 25
-                #                 break
-                #     found -= 1
-                #     if found == 0:
-                #         break
-                # found = 25
-                # for x in range(output_frame - 1, -1, -1):
-                #     if x % 2 == 1:
-                #         continue
-                #     x = str(x)
-                #     if x not in data:
-                #         data[x] = {}
-                #     if delete_val[1] in data[x].keys():
-
-                #         for yy in range(len(data[x][delete_val[1]])):
-                #             if delete_val[0] == data[x][delete_val[1]][yy][0]:
-                #                 data[x][delete_val[1]].pop(yy)
-                #                 found = 25
-                #                 break
-                #     found -= 1
-                #     if found == 0:
-                #         break
                 save_json(data, CSV)
                 delete_val = ""
                 window['Delete_drop'].Update(values=drop_down_list(output_frame, data))
