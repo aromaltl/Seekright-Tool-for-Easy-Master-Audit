@@ -17,7 +17,7 @@ from final_submit import final_verify
 from utils import mouse_call, extract_for_annotations, linear_data, addBBox, linear_remove, remove_left_lights
 from utils import Task
 import utils
-
+from guiutils import AssetSelectWindow
 """
 LAYOUT DESIGN
 """
@@ -57,29 +57,6 @@ PLAY = True
 #           sg.Text('Frame no: '), Input]]
 
 
-# Join two columns
-def asset_select_window(keys, cols,hide=True):
-    '''
-    creating window for asset selection
-    
-    '''
-    layout = []
-
-    d = len(keys)
-    r = d % cols
-    keys = keys + [""] * (cols - r)
-    n = len(keys) // cols
-    
-    for hh in range(n):
-        layout.append([sg.Button(keys[x + hh * cols], size=(32, 1), pad=(0, 0)) for x in range(cols)])
-    layout.append([sg.Button("SELECTALL", size=(32, 1),button_color='red', pad=(0, 0))])
-    layout.append([sg.InputText('', key='New_Asset', size=(58, 1)) ,sg.Button('ADD_NEW_ASSET', size=(18, 1))])  # ,
-    
-    win = sg.Window("Select Asset", layout, resizable=True, keep_on_top=True, finalize=True, enable_close_attempted_event=True,
-                    element_justification='c', return_keyboard_events=True)
-    if hide:
-        win.hide()
-    return win
 
 
 def save_json(data, CSV):
@@ -189,7 +166,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
     stream=False
     window_read = True
     # ip = ''
-    PREV_SELECTED_ASSET = ''
+    SelectWindow = AssetSelectWindow()
     delete_val = ''
     
     while True:
@@ -270,7 +247,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                         assets.append(x)
                 
                 assets.sort(key=lambda strings: strings.replace("_End","").replace("Bad_","").replace("_Start",""))
-                asset_window = asset_select_window(assets, 6)
+                SelectWindow.create_asset_select_window(assets, 6)
 
                 window['Delete_drop'].Update(values=drop_down_list(output_frame, data))
 
@@ -283,7 +260,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
         if event == 'STOP':
             stream = False
             output_frame = 0
-            asset_window.close()
+            SelectWindow.close()
             # ip = None
             # CSV = None
             img = cv2.imread('seek.png')
@@ -298,81 +275,41 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
             if event == 'Add Data' or 'alt_l' in event.lower() or 'control_l' in event.lower():
                 
                 if event == 'Add Data' or 'alt_l' in event.lower():
-                    asset_window.UnHide()
+                    if  SelectWindow.asset_select_window(assets,data):
+                            
+                        PREV_SELECTED_ASSET = SelectWindow.selection
+                        event = event if window_read else " "
+                        if len(PREV_SELECTED_ASSET) == 0: 
+                            continue
+                        cap.set(cv2.CAP_PROP_POS_FRAMES, output_frame)
+                        utils.safe_open_window(windowname ='select the area')
+                        ret, frame = cap.read()
+                        if not ret:
+                            frame =np.zeros((h,w,3),np.uint8)
+                        r = cv2.selectROI("select the area", frame)
+                        cv2.destroyWindow("select the area")
+                        if r[2] + r[3] < 10 :
+                            continue
+                        # if type(delete_val) is str and len(delete_val):
+                        #     addtoJSON(output_frame, PREV_SELECTED_ASSET, [(r[0], r[1]), (r[2] + r[0], r[3] + r[1])], data,
+                        #               delete_val)
+                        # else:
+                        if 1:
+                            data[PREV_SELECTED_ASSET] += 1
+                            BASE_PREV_SELECTED_ASSET = PREV_SELECTED_ASSET.replace("_Start","").replace("_End","")
+                            if BASE_PREV_SELECTED_ASSET in lin:
+                                side = '1' if  (r[0]+(r[2]//2) ) > w//2 else '0'
+                                
+                                # if data["flag"][BASE_PREV_SELECTED_ASSET][side]==1: # only at end 
+                                linear_remove(data,BASE_PREV_SELECTED_ASSET,side,output_frame,w)
+                                if PREV_SELECTED_ASSET != BASE_PREV_SELECTED_ASSET:
+                                    data["flag"][BASE_PREV_SELECTED_ASSET][side]=(data["flag"][BASE_PREV_SELECTED_ASSET][side]+1)%2
 
-                    while True:
-                        column, val = asset_window.read()
-                        segment=val["New_Asset"].lower()
-                        for fil in assets :
-                            if segment in fil.lower():
-                                if "End" in fil:
-                                    asset_window[fil].Update(button_color="#A35060")
-                                elif "Start" in fil:
-                                    asset_window[fil].Update(button_color="#D68393")
-                                else:
-                                    asset_window[fil].Update(button_color="#cc6479")
-                            else:
-                                asset_window[fil].Update(button_color="#6a759b")
-                        
-                        # if column == "FILTER" or "Return" in column or column == "\r":
-                        #     segment=val["New_Asset"].lower()
-                        #     for fil in assets :
-                        #         if segment in fil.lower():
-                        #             asset_window[fil].Update(button_color="#cc6479")
-                        #         else:
-                        #             asset_window[fil].Update(button_color="#6a759b")
-
-                        if column == "ADD_NEW_ASSET":
-                            data[val["New_Asset"]] = 9900
-                            asset_window.close()
-                            assets.append(val["New_Asset"])
-                            assets.sort(key=lambda strings: strings.replace("_End","").replace("Bad_","").replace("_Start",""))
-                            asset_window = asset_select_window(assets, 6,hide=False)
-
-                        elif column  in assets or column == "-WINDOW CLOSE ATTEMPTED-":
-                           
-                            if column != "-WINDOW CLOSE ATTEMPTED-":
-                                PREV_SELECTED_ASSET = column
-                            for fil in assets :
-                                asset_window[fil].Update(button_color="#6a759b")
-                            asset_window.hide()
-                            break
-                        
-                    # asset_window.hide()
-                    if column == "-WINDOW CLOSE ATTEMPTED-":
-                        continue
-                event = event if window_read else " "
-                if len(PREV_SELECTED_ASSET) == 0:
-                    continue
-                cap.set(cv2.CAP_PROP_POS_FRAMES, output_frame)
-                utils.safe_open_window(windowname ='select the area')
-                ret, frame = cap.read()
-                if not ret:
-                    frame =np.zeros((h,w,3),np.uint8)
-                r = cv2.selectROI("select the area", frame)
-                cv2.destroyWindow("select the area")
-                if sum(r) == 0:
-                    continue
-                # if type(delete_val) is str and len(delete_val):
-                #     addtoJSON(output_frame, PREV_SELECTED_ASSET, [(r[0], r[1]), (r[2] + r[0], r[3] + r[1])], data,
-                #               delete_val)
-                # else:
-                if 1:
-                    data[PREV_SELECTED_ASSET] += 1
-                    BASE_PREV_SELECTED_ASSET = PREV_SELECTED_ASSET.replace("_Start","").replace("_End","")
-                    if BASE_PREV_SELECTED_ASSET in lin:
-                        side = '1' if  (r[0]+(r[2]//2) ) > w//2 else '0'
-                        
-                        # if data["flag"][BASE_PREV_SELECTED_ASSET][side]==1: # only at end 
-                        linear_remove(data,BASE_PREV_SELECTED_ASSET,side,output_frame,w)
-                        if PREV_SELECTED_ASSET != BASE_PREV_SELECTED_ASSET:
-                            data["flag"][BASE_PREV_SELECTED_ASSET][side]=(data["flag"][BASE_PREV_SELECTED_ASSET][side]+1)%2
-
-                    addtoJSON(output_frame, PREV_SELECTED_ASSET, [(r[0], r[1]), (r[2] + r[0], r[3] + r[1])], data,
-                              data[PREV_SELECTED_ASSET])
-                frame = addBBox(frame, output_frame, data)
-                save_json(data, CSV)
-                window['Delete_drop'].Update(values=drop_down_list(output_frame, data))
+                            addtoJSON(output_frame, PREV_SELECTED_ASSET, [(r[0], r[1]), (r[2] + r[0], r[3] + r[1])], data,
+                                    data[PREV_SELECTED_ASSET])
+                        frame = addBBox(frame, output_frame, data)
+                        save_json(data, CSV)
+                        window['Delete_drop'].Update(values=drop_down_list(output_frame, data))
 
             if event == 'RemoveAsset':
                 os.makedirs(f"DeletedImages/{vname}" ,exist_ok =True)
@@ -380,13 +317,12 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                     if not os.path.exists(f"DeletedImages/{vname}/{__}backup.json"):
                         save_json(data,f"DeletedImages/{vname}/{__}backup.json")
                         break
-                asset_window.UnHide()
-                column, val = asset_window.read()
-                lrfr=values['Removefr']
 
-                remove_left_lights(data,cap,column,lrfr,output_frame)
-                asset_window.Hide()
-                save_json(data,CSV)
+                if SelectWindow.asset_select_window(assets,data):
+                    lrfr=values['Removefr']
+                    remove_left_lights(data,cap,SelectWindow.selection,lrfr,output_frame)
+                  
+                    save_json(data,CSV)
                     
 
             if event == 'SAVE FRAME' or letter == 83:
