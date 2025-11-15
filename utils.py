@@ -6,9 +6,13 @@ import time
 from opencv_draw_annotation import draw_bounding_box
 import json
 
-
+with open("template.yaml","r") as f:
+    template = yaml.safe_load(f.read())
 with open("config.yaml","r") as f:
     config = yaml.safe_load(f.read())
+for x in template:
+    if x not in config:
+        config[x]=template[x]
 
 def save_json(data, CSV):
     '''
@@ -132,15 +136,28 @@ except Exception as ex:
 
 
 
-        
-def addBBox(im, frameNo, data):
-    if str(frameNo) not in data:
-        data[str(frameNo)] = {}
-    for ass in data[str(frameNo)]:
-        for items in data[str(frameNo)][ass]:
-            draw_bounding_box(im, (items[1][0], items[1][1], items[2][0], items[2][1]), labels=[items[0], ass],
-                              color='green')
-    return im   
+if not config["draw_contours"] :      
+    def addBBox(im, frameNo, data):
+        if str(frameNo) not in data:
+            data[str(frameNo)] = {}
+        for ass in data[str(frameNo)]:
+            for items in data[str(frameNo)][ass]:
+                draw_bounding_box(im, (items[1][0], items[1][1], items[2][0], items[2][1]), labels=[items[0], ass],
+                                color='green')
+        return im   
+else:
+    def addBBox(im, frameNo, data):
+        if str(frameNo) not in data:
+            data[str(frameNo)] = {}
+        for ass in data[str(frameNo)]:
+            for items in data[str(frameNo)][ass]:
+                draw_bounding_box(im, (items[1][0], items[1][1], items[2][0], items[2][1]), labels=[items[0], ass],
+                                color='green')
+                if len(items) > 3:
+                    pts_np = np.array(items[3], dtype=np.int32).reshape((-1, 1, 2))
+                    cv2.polylines(im, [pts_np], isClosed=True, color=(5, 10, 255), thickness=2)
+        return im   
+
 
 
 
@@ -176,8 +193,9 @@ def linear_data(data,total_frames,width):
                     side =  '1' if ((ids[1][0]+ids[2][0])//2) > width//2 else '0'
                     addkeys(linear["asset"][asset],(ids[0],side),[frame,frame])
                     linear["asset"][asset][ids[0]][side][1]=frame
-           
-    # print(linear)
+    import json
+    with open("savvee.json", 'w') as file:
+        json.dump(linear["asset"], file, indent=4)
     return linear
             
         
@@ -537,6 +555,7 @@ class Task:
         
         ret = True
         PAUSE = True
+        loading_firstime = True
         # asset_seen = set()
         delay = 0.008 / config['speed']
         play_size = config["play_size"]
@@ -545,27 +564,34 @@ class Task:
         safe_open_window('OUT')
         del_ast = mouse_call(self.w,self.h)
         cv2.setMouseCallback('OUT',  del_ast.mclbk)
-        # cap.set(1,output_frame)
-        # ret,copy_frame=cap.read()
+        # self.cap.set(1,output_frame)
+        # ret,copy_frame=self.cap.read()
         # cap.set(1,output_frame)
         # h,w,_ = copy_frame.shape
         delete_val =None
-        copy_frame=cv2.resize(frame,(self.w,self.h))
+        # copy_frame=cv2.resize(frame,(self.w,self.h))
 
         # cap.set(1, output_frame)
         while True:
             new_asset = False
             window_read=True
 
-            if not PAUSE:
+            if not PAUSE or loading_firstime:
                 del_ast.ast=None
-                output_frame += 2
-                ret, frame = self.cap.read()
-                ret, frame = self.cap.read()
-                
+                if not loading_firstime:
+                    output_frame += 2
+                    ret, frame = self.cap.read()
+                    ret, frame = self.cap.read()
+
+                else:
+                    self.cap.set(1,output_frame)
+                    ret,frame=self.cap.read()
+                       
                 if not ret:
                     break
+                
                 copy_frame = frame.copy()
+                
                 
                 if str(output_frame) not in data:
                     data[str(output_frame)] = {}
@@ -610,11 +636,14 @@ class Task:
                                     del del_ast
                                     cv2.destroyWindow("OUT")
                                     return False, output_frame, temp_data,frame
-                                if key_press == 27:
+                                elif key_press == 27:
                                     del del_ast
 
                                     cv2.destroyWindow("OUT")
                                     return True, output_frame, None,None
+                                elif loading_firstime:
+                                    PAUSE = False
+
 
         
                         else:          
@@ -627,6 +656,7 @@ class Task:
                                 draw_bounding_box(frame, (items[1][0], items[1][1], items[2][0], items[2][1]),
                                                     labels=[items[0], ass],
                                                     color='#c62424', border_thickness=3,)
+                loading_firstime = False
                 frame = cv2.resize(frame, play_size)
                 cv2.imshow("OUT", frame)
                 time.sleep(delay)
@@ -641,9 +671,9 @@ class Task:
                 save_json(data,self.CSV)
                 cv2.imshow("OUT", frame)
             else:
-                if (frame.shape != copy_frame).any():
-                    # print(w,h,frame.shape, copy_frame)
-                    frame = cv2.resize(frame,(self.w,self.h))
+                # if (frame.shape != copy_frame).any():
+                #     # print(w,h,frame.shape, copy_frame)
+                #     frame = cv2.resize(frame,(self.w,self.h))
                 cv2.imshow("OUT", frame)
             
 

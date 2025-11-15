@@ -53,7 +53,7 @@ class AssetSelectWindow:
                 assets.sort(key=lambda strings: strings.replace("_End","").replace("Bad_","").replace("_Start",""))
                 self.create_asset_select_window(assets, 6,hide=False)
 
-            elif column  in assets or column == "-WINDOW CLOSE ATTEMPTED-":
+            elif column  in assets or column == "-WINDOW CLOSE ATTEMPTED-" or column == "SELECTALL":
                 for fil in assets :
                     self.asset_window[fil].Update(button_color="#6a759b")
                 self.asset_window.hide()

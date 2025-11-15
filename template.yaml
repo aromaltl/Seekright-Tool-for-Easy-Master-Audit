@@ -1,5 +1,6 @@
 speed: 1.1
 play_size: [1920, 1080]  # (1280, 720)
+draw_contours : False
 det_loc:
   default: 2
   light_nth_last: 2
