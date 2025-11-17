@@ -167,7 +167,6 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
     # ip = ''
     SelectWindow = AssetSelectWindow()
     delete_val = ''
-    
     while True:
 
         letter = None
@@ -267,10 +266,10 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
 
         if stream:
 
-            if event == 'Add Data' or 'alt_l' in event.lower() or 'control_l' in event.lower():
+            if event == 'Add Data' or 'alt_l' in event.lower() or 'control_l' in event.lower() :
                 
                 if event == 'Add Data' or 'alt_l' in event.lower():
-                    if not SelectWindow.asset_select_window(assets,data):
+                    if not SelectWindow.asset_select_window(data):
                         continue         
                 PREV_SELECTED_ASSET = SelectWindow.selection
                 event = event if window_read else " "
@@ -285,11 +284,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                 cv2.destroyWindow("select the area")
                 if r[2] + r[3] < 10 :
                     continue
-                # if type(delete_val) is str and len(delete_val):
-                #     addtoJSON(output_frame, PREV_SELECTED_ASSET, [(r[0], r[1]), (r[2] + r[0], r[3] + r[1])], data,
-                #               delete_val)
-                # else:
-
+                #####################################
                 data[PREV_SELECTED_ASSET] += 1
                 BASE_PREV_SELECTED_ASSET = PREV_SELECTED_ASSET.replace("_Start","").replace("_End","")
                 if BASE_PREV_SELECTED_ASSET in lin:
@@ -313,7 +308,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                         save_json(data,f"DeletedImages/{vname}/{__}backup.json")
                         break
 
-                if SelectWindow.asset_select_window(assets,data):
+                if SelectWindow.asset_select_window(data):
                     lrfr=values['Removefr']
                     remove_left_lights(data,cap,SelectWindow.selection,lrfr,output_frame)
                   
@@ -380,7 +375,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
 
             if event == 'PLAY' or 'space:' in event.lower() and 'back' not in event.lower() or event == " ":  # backspace should not activate
                 while True:
-                    BRAKE, output_frame, temp,frame = run.opencv_gui(data,frame,output_frame)
+                    BRAKE, output_frame, temp,frame = run.opencv_gui(data,frame,output_frame,SelectWindow)
                     if not BRAKE :
                         
                         data[str(output_frame)]=temp

@@ -5,7 +5,8 @@ import os
 import time
 from opencv_draw_annotation import draw_bounding_box
 import json
-
+import threading
+lock = threading.Lock()
 with open("template.yaml","r") as f:
     template = yaml.safe_load(f.read())
 with open("config.yaml","r") as f:
@@ -13,7 +14,7 @@ with open("config.yaml","r") as f:
 for x in template:
     if x not in config:
         config[x]=template[x]
-
+lin = set(config["linear"])
 def save_json(data, CSV):
     '''
     save json 
@@ -25,10 +26,26 @@ def save_json(data, CSV):
 def safe_open_window(windowname):
     cv2.namedWindow(windowname, cv2.WND_PROP_FULLSCREEN)
     cv2.imshow(windowname,  np.zeros((300,300),np.uint8) )
-    for ___ in range(20):
+    for ___ in range(15):
         cv2.waitKey(1)
     cv2.setWindowProperty(windowname, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
+
+def addasset(data,asset,ids,frameno,width,):
+    newids = [ids[0]]+ids[1:]
+    PREV_SELECTED_ASSET= asset
+    data[PREV_SELECTED_ASSET] += 1
+    data.setdefault(str(frameno), {}).setdefault(PREV_SELECTED_ASSET, [])
+    newids[0] =str(data[PREV_SELECTED_ASSET])
+    data[str(frameno)][PREV_SELECTED_ASSET].append(newids)
+
+    BASE_PREV_SELECTED_ASSET = PREV_SELECTED_ASSET.replace("_Start","").replace("_End","")
+    if BASE_PREV_SELECTED_ASSET in lin:
+        side =  '1' if ((ids[1][0]+ids[2][0])//2) > width//2 else '0'
+        
+        linear_remove(data,BASE_PREV_SELECTED_ASSET,side,frameno,width)
+        if PREV_SELECTED_ASSET != BASE_PREV_SELECTED_ASSET:
+            data["flag"][BASE_PREV_SELECTED_ASSET][side]=(data["flag"][BASE_PREV_SELECTED_ASSET][side]+1)%2
 
 
 def remove_left_lights(data,cap,column,lrfr,current_frame):
@@ -370,11 +387,12 @@ def extract_for_annotations(cap,frame,vname):
 
 
 class mouse_call:
-    def __init__(self,width,height) :
+    def __init__(self,width,height,selection) :
         self.ast = None
         self.input =None
         self.changed=False
-        self.video_size = width,height
+        self.video_size = width, height
+        self.asset_select_window = selection
         
 
         # self.cap=cap
@@ -387,49 +405,56 @@ class mouse_call:
         return img
 
     def mclbk(self,event, x, y, flags,param):
-        if event == cv2.EVENT_LBUTTONDOWN or event == cv2.EVENT_MBUTTONDOWN or event == cv2.EVENT_RBUTTONDOWN:
-            self.input=event,x,y
-            self.changed = True
+        with lock:
+            if event == cv2.EVENT_LBUTTONDOWN or event == cv2.EVENT_MBUTTONDOWN or event == cv2.EVENT_RBUTTONDOWN:
+                self.input=event,x,y
+                self.changed = True ## Can cause dead lock donto
 
 
-    def update(self,data,framno,total_frames,cap,vname):
-        if self.input is None:
+    def update(self,data,frameno,total_frames,cap,vname):
+        if self.input_get() is None:
             return
-        event,x,y= self.input
-        self.input=None
+        event,x,y= self.input_get()
+        self.input_set(None)
+        PREV_SELECTED_ASSET = ''
         if event == cv2.EVENT_LBUTTONDOWN:
             if self.ast is None:
-                for xx in data[str(framno)]:
-                    for id, yy in enumerate(data[str(framno)][xx]):
-                        # print(x,y,yy)
+                for xx in data[str(frameno)]:
+                    for id, yy in enumerate(data[str(frameno)][xx]):
+
                         if  int(yy[1][0]) <= x <= int(yy[2][0]) and int(yy[1][1]) <= y <= int(yy[2][1]):
                             self.ast = yy,xx
-                            self.changed =True
+                            
+                            self.changed_set(True)
                             break
             else:
                 self.ast=None
 
+        output_frame=frameno
 
-
-        output_frame=framno
-
-
-        if (event == cv2.EVENT_MBUTTONDOWN or event == cv2.EVENT_RBUTTONDOWN) and self.ast is not None:
+        if (event == cv2.EVENT_MBUTTONDOWN or event == cv2.EVENT_RBUTTONDOWN)  and self.ast is not None:
             ids,asset = self.ast
-
             if "_End" in asset or  "Start" in asset: ## update flag if manually added linear deleted
                 side =  '1' if ((ids[1][0]+ids[2][0])//2) > self.video_size[0]//2 else '0'
                 asset = asset.replace("_Start","").replace("_End","")
                 data["flag"][asset][side]=(data["flag"][asset][side]+1)%2
                 
-            delete_val = self.ast
+            if event == cv2.EVENT_RBUTTONDOWN:
+                if not self.asset_select_window.asset_select_window(data):
+                    self.ast=None
+                    return
+                PREV_SELECTED_ASSET=self.asset_select_window.selection
+                addasset(data,PREV_SELECTED_ASSET,ids,frameno,self.video_size[0])
+
+
+            # delete_val = ids,asset
+            delete_val = ((ids[0],ids[1:]),asset)
             found = 25
             extract_for_annotations(cap,output_frame,vname)
-            if event == cv2.EVENT_RBUTTONDOWN: # ignore current frame asset, delete all others of given id
-                RANGE=range(output_frame+1, total_frames)
-            else:# asset delete all given id
-                RANGE=range(output_frame, total_frames)
-            
+
+            RANGE=range(output_frame, total_frames)
+            print(delete_val,output_frame,PREV_SELECTED_ASSET,"@#@#@#@#")
+            PREV_SELECTED_ASSET = '' if '_start' in PREV_SELECTED_ASSET.lower() or '_end' in PREV_SELECTED_ASSET.lower() else PREV_SELECTED_ASSET
             for x in RANGE:
                 if x % 2 == 1:
                     continue
@@ -440,11 +465,15 @@ class mouse_call:
                 if delete_val[1] in data[x].keys():
 
                     for yy in range(len(data[x][delete_val[1]])):
-
+                        print(data[x][delete_val[1]][yy],x,delete_val)
                         if delete_val[0][0] == data[x][delete_val[1]][yy][0]:
-                            data[x][delete_val[1]].pop(yy)
+                            deleted_asset = data[x][delete_val[1]].pop(yy)
+                            
+                            if PREV_SELECTED_ASSET and x!=output_frame:
+                                deleted_asset[0] = str(data[PREV_SELECTED_ASSET] )
+                                data[x].setdefault(PREV_SELECTED_ASSET, []).append(deleted_asset)
                             found = 25
-                            self.changed=True
+                            self.changed_set(True)
                             break
                 found -= 1
                 if found == 0:
@@ -459,16 +488,32 @@ class mouse_call:
                 if delete_val[1] in data[x].keys():
 
                     for yy in range(len(data[x][delete_val[1]])):
+                        print(data[x][delete_val[1]][yy],x,delete_val[1])
                         if delete_val[0][0] == data[x][delete_val[1]][yy][0]:
-                            data[x][delete_val[1]].pop(yy)
+                            deleted_asset = data[x][delete_val[1]].pop(yy)
+                            
+                            if PREV_SELECTED_ASSET :
+                                deleted_asset[0] = str(data[PREV_SELECTED_ASSET] )
+                                data[x].setdefault(PREV_SELECTED_ASSET, []).append(deleted_asset)
                             found = 25
-                            self.changed = True
+                            self.changed_set(True)
                             break
                 found -= 1
                 if found == 0:
                     break
             self.ast=None
-
+    def changed_set(self,val):
+        with lock:
+            self.changed = val
+    def changed_get(self):
+        with lock:
+            return self.changed
+    def input_get(self):
+        with lock:
+            return self.input
+    def input_set(self,val):
+        with lock:
+            self.input =val
 
 # added to class
 
@@ -486,6 +531,7 @@ class Task:
         self.total_frames = total_frames
         self.linear = linear
         self.asset_seen =set()
+        
     
 
     def remove_asset(self, data,output_frame,delete_val):
@@ -551,7 +597,7 @@ class Task:
         return int(self.total_frames/2)*2 - 2
 
 
-    def opencv_gui(self,data,frame,output_frame):
+    def opencv_gui(self,data,frame,output_frame,Selection):
         
         ret = True
         PAUSE = True
@@ -562,7 +608,7 @@ class Task:
         lin = set(config["linear"])
 
         safe_open_window('OUT')
-        del_ast = mouse_call(self.w,self.h)
+        del_ast = mouse_call(self.w,self.h,Selection)
         cv2.setMouseCallback('OUT',  del_ast.mclbk)
         # self.cap.set(1,output_frame)
         # ret,copy_frame=self.cap.read()
@@ -573,6 +619,7 @@ class Task:
 
         # cap.set(1, output_frame)
         while True:
+
             new_asset = False
             window_read=True
 
@@ -592,7 +639,7 @@ class Task:
                 
                 copy_frame = frame.copy()
                 
-                
+                loading_firstime =False
                 if str(output_frame) not in data:
                     data[str(output_frame)] = {}
 
@@ -634,40 +681,40 @@ class Task:
                                         temp_data[ass+edge]=[drop_item]
 
                                     del del_ast
+                                    self.asset_seen=set()
                                     cv2.destroyWindow("OUT")
                                     return False, output_frame, temp_data,frame
                                 elif key_press == 27:
                                     del del_ast
-
+                                    self.asset_seen=set()
                                     cv2.destroyWindow("OUT")
                                     return True, output_frame, None,None
-                                elif loading_firstime:
-                                    PAUSE = False
+                                # elif loading_firstime:
+                                #     PAUSE = False
 
-
-        
                         else:          
 
                             if str(items[0]) + ass not in self.asset_seen:
                                 self.asset_seen.add(str(items[0]) + ass)
-                                new_asset = True
-                                
+                                # new_asset = True
+                                PAUSE =True
                                 delete_val = items[0],ass
                                 draw_bounding_box(frame, (items[1][0], items[1][1], items[2][0], items[2][1]),
                                                     labels=[items[0], ass],
                                                     color='#c62424', border_thickness=3,)
-                loading_firstime = False
+                
                 frame = cv2.resize(frame, play_size)
                 cv2.imshow("OUT", frame)
                 time.sleep(delay)
 
 
 
-            elif del_ast.changed:
+            elif del_ast.changed_get():
                 del_ast.update(data,output_frame,self.total_frames,self.cap2,self.vname)
-                frame=addBBox(copy_frame.copy(), output_frame, data)
+                frame = addBBox(copy_frame.copy(), output_frame, data)
                 frame = del_ast.highlight(frame)
-                del_ast.changed = False
+
+                del_ast.changed_set(False)
                 save_json(data,self.CSV)
                 cv2.imshow("OUT", frame)
             else:
@@ -679,7 +726,8 @@ class Task:
 
             key_press = cv2.waitKey(1) & 0xff
 
-            if key_press == ord(' ') or new_asset:
+            if key_press == ord(' ') :
+                
                 PAUSE = not PAUSE
             if  key_press == ord('s'):
                 window_read=False
@@ -690,7 +738,22 @@ class Task:
                 delete_val=None
                 PAUSE = not PAUSE
                 save_json(data,self.CSV)
+            if key_press == ord('y') and del_ast.ast:
+                items,asset = del_ast.ast
+                if asset in lin:
+                    data[str(output_frame)][asset].remove(items)
+                    side =  '1' if ((items[1][0]+items[2][0])//2) > self.w//2 else '0'
+                    edge = "_End" if data["flag"][ass][side]==1 else "_Start"
+                    asset = asset+edge
                 
+                addasset(data,asset ,ids =items,frameno=output_frame,width=self.w)
+                frame=addBBox(copy_frame.copy(), output_frame, data)
+                # frame = del_ast.highlight(frame)
+
+                del_ast.ast =None
+                save_json(data,self.CSV)
+                cv2.imshow("OUT", frame)
+            # if key_press == ord('r'):
 
 
 
@@ -703,6 +766,7 @@ class Task:
                 break
             if not ret or key_press == 27:
                 # del obj
+
                 break
         del del_ast
         self.asset_seen=set()
@@ -718,9 +782,6 @@ class Task:
                     side =  '1' if ((ids[1][0]+ids[2][0])//2) > self.w//2 else '0'
                     
                     data["flag"][asset][side]=(data["flag"][asset][side]+1)%2
-
-
-
 
 
     def remove_asset(self,data,output_frame ,delete_val):
