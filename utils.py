@@ -434,10 +434,10 @@ class mouse_call:
 
         if (event == cv2.EVENT_MBUTTONDOWN or event == cv2.EVENT_RBUTTONDOWN)  and self.ast is not None:
             ids,asset = self.ast
-            if "_End" in asset or  "Start" in asset: ## update flag if manually added linear deleted
+            if "_End" in asset or  "_Start" in asset: ## update flag if manually added linear deleted
                 side =  '1' if ((ids[1][0]+ids[2][0])//2) > self.video_size[0]//2 else '0'
-                asset = asset.replace("_Start","").replace("_End","")
-                data["flag"][asset][side]=(data["flag"][asset][side]+1)%2
+                assetlin = asset.replace("_Start","").replace("_End","")
+                data["flag"][assetlin][side]=(data["flag"][assetlin][side]+1)%2
                 
             if event == cv2.EVENT_RBUTTONDOWN:
                 if not self.asset_select_window.asset_select_window(data):
@@ -453,8 +453,8 @@ class mouse_call:
             extract_for_annotations(cap,output_frame,vname)
 
             RANGE=range(output_frame, total_frames)
-            print(delete_val,output_frame,PREV_SELECTED_ASSET,"@#@#@#@#")
-            PREV_SELECTED_ASSET = '' if '_start' in PREV_SELECTED_ASSET.lower() or '_end' in PREV_SELECTED_ASSET.lower() else PREV_SELECTED_ASSET
+            
+            PREV_SELECTED_ASSET = '' if '_Start' in PREV_SELECTED_ASSET or '_End' in PREV_SELECTED_ASSET else PREV_SELECTED_ASSET
             for x in RANGE:
                 if x % 2 == 1:
                     continue
@@ -465,7 +465,6 @@ class mouse_call:
                 if delete_val[1] in data[x].keys():
 
                     for yy in range(len(data[x][delete_val[1]])):
-                        print(data[x][delete_val[1]][yy],x,delete_val)
                         if delete_val[0][0] == data[x][delete_val[1]][yy][0]:
                             deleted_asset = data[x][delete_val[1]].pop(yy)
                             
@@ -487,8 +486,7 @@ class mouse_call:
                     data[x] = {}
                 if delete_val[1] in data[x].keys():
 
-                    for yy in range(len(data[x][delete_val[1]])):
-                        print(data[x][delete_val[1]][yy],x,delete_val[1])
+                    for yy in range(len(data[x][delete_val[1]])):   
                         if delete_val[0][0] == data[x][delete_val[1]][yy][0]:
                             deleted_asset = data[x][delete_val[1]].pop(yy)
                             
@@ -716,11 +714,13 @@ class Task:
 
                 del_ast.changed_set(False)
                 save_json(data,self.CSV)
+                # frame = cv2.resize(frame, play_size)
                 cv2.imshow("OUT", frame)
             else:
                 # if (frame.shape != copy_frame).any():
                 #     # print(w,h,frame.shape, copy_frame)
                 #     frame = cv2.resize(frame,(self.w,self.h))
+                # frame = cv2.resize(frame, play_size)
                 cv2.imshow("OUT", frame)
             
 
@@ -729,16 +729,16 @@ class Task:
             if key_press == ord(' ') :
                 
                 PAUSE = not PAUSE
-            if  key_press == ord('s'):
+            elif  key_press == ord('s'):
                 window_read=False
                 event = 'control_l'
                 break
-            if  key_press == ord('f') and delete_val is not None :
+            elif  key_press == ord('f') and delete_val is not None :
                 self.remove_asset(data,output_frame,delete_val)
                 delete_val=None
                 PAUSE = not PAUSE
                 save_json(data,self.CSV)
-            if key_press == ord('y') and del_ast.ast:
+            elif key_press == ord('y') and del_ast.ast:
                 items,asset = del_ast.ast
                 if asset in lin:
                     data[str(output_frame)][asset].remove(items)
@@ -752,19 +752,20 @@ class Task:
 
                 del_ast.ast =None
                 save_json(data,self.CSV)
+                # frame = cv2.resize(frame, play_size)
                 cv2.imshow("OUT", frame)
             # if key_press == ord('r'):
 
 
 
-            if key_press == ord('w'):
+            elif key_press == ord('w'):
                 PAUSE=False
                 output_frame=self.next_asset(data,output_frame)
-            if key_press == 233:
+            elif key_press == 233:
                 window_read=False
                 event = 'alt_l'
                 break
-            if not ret or key_press == 27:
+            elif not ret or key_press == 27:
                 # del obj
 
                 break
@@ -802,7 +803,7 @@ class Task:
             pass
 
 
-        found = 25
+        found = 30
         for x in range(output_frame, self.total_frames):
             if x % 2 == 1:
                 continue
@@ -821,12 +822,12 @@ class Task:
                             side =  '1' if ((ids[1][0]+ids[2][0])//2) > self.w//2 else '0'
                             data["flag"][asset][side]=(data["flag"][asset][side]+1)%2
                             return
-                        found = 25
+                        found = 30
                         break
             found -= 1
             if found == 0:
                 break
-        found = 25
+        found = 30
         for x in range(output_frame - 1, -1, -1):
             if x % 2 == 1:
                 continue
@@ -838,7 +839,7 @@ class Task:
                 for yy in range(len(data[x][delete_val[1]])):
                     if delete_val[0] == data[x][delete_val[1]][yy][0]:
                         data[x][delete_val[1]].pop(yy)
-                        found = 25
+                        found = 30
                         break
             found -= 1
             if found == 0:
