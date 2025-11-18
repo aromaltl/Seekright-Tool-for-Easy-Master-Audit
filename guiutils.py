@@ -53,9 +53,10 @@ class AssetSelectWindow:
             if column == "ADD_NEW_ASSET":
                 data[val["New_Asset"]] = 9900
                 self.asset_window.close()
-                self.assets.append(val["New_Asset"])
-                self.assets.sort(key=lambda strings: strings.replace("_End","").replace("Bad_","").replace("_Start",""))
-                self.create_asset_select_window(self.assets, 6,hide=False)
+                self.assets.add(val["New_Asset"])
+                assetlist = list(self.assets)
+                assetlist.sort(key=lambda strings: strings.replace("_End","").replace("Bad_","").replace("_Start",""))
+                self.create_asset_select_window(assetlist, 6,hide=False)
 
             elif column  in self.assets or column == "-WINDOW CLOSE ATTEMPTED-" or column == "SELECTALL":
                 for fil in self.assets :
