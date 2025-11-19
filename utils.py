@@ -468,7 +468,7 @@ class mouse_call:
                         if delete_val[0][0] == data[x][delete_val[1]][yy][0]:
                             deleted_asset = data[x][delete_val[1]].pop(yy)
                             
-                            if PREV_SELECTED_ASSET and x!=output_frame:
+                            if PREV_SELECTED_ASSET and int(x)!=output_frame:
                                 deleted_asset[0] = str(data[PREV_SELECTED_ASSET] )
                                 data[x].setdefault(PREV_SELECTED_ASSET, []).append(deleted_asset)
                             found = 25
