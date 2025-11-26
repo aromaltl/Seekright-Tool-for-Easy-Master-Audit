@@ -60,25 +60,28 @@ def remove_left_lights(data,cap,column,lrfr,current_frame):
             
             if x not in data:
                 data[x] = {}
-            if column =="SELECTALL":
-                del data[x]
-                continue
-            
-            if column not in data[x] :
-                continue
-            if lrfr[0].isdigit():
-                del data[x][column]
-                continue
-            temp = []
-            for yy in data[x][column]:
 
-                if ((yy[1][0]+yy[2][0])//2)>width and lrfr[0].lower() == 'l':
-                    temp.append(yy)
-                if ((yy[1][0]+yy[2][0])//2)<width and lrfr[0].lower() == 'r':
-                    temp.append(yy)
+            if lrfr[0].isdigit():
+                if column == "SELECTALL":
+                    del data[x]
+                elif column in data[x]:
                 
-            data[x][column] = temp
-                    
+                    del data[x][column]
+            else:
+                columns = data[x].keys() if column=="SELECTALL" else [column]
+                
+                for asset in columns:
+                    if asset in data[x]:
+                        temp = []
+                        for yy in data[x][asset]:
+                            
+                            if ((yy[1][0]+yy[2][0])//2)>width and lrfr[0].lower() == 'l':
+                                temp.append(yy)
+                            if ((yy[1][0]+yy[2][0])//2)<width and lrfr[0].lower() == 'r':
+                                temp.append(yy)
+                            
+                        data[x][asset] = temp
+                        
 
 
 
