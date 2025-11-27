@@ -16,7 +16,9 @@ remarks:
     - Plant Overgrown
     - Dirt
     - Not Working
-  
+fixed:
+    - updateinconfig
+
 linear:
     - Bad_Crash_Barrier
     - Bad_Fence

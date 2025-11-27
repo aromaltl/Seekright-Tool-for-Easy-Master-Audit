@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import PySimpleGUI as sg
+
 import numpy as np
 import pandas as pd
 import os
@@ -8,8 +8,18 @@ import ast
 import json
 import time
 import yaml
+
+
+import yaml
+with open("template.yaml","r") as f:
+    template = yaml.safe_load(f.read())
 with open("config.yaml","r") as f:
     config = yaml.safe_load(f.read())
+    
+for x in template:
+    if x not in config:
+        config[x]=template[x]
+
 
 
 from upload import converting_to_asset_format, generate, confirmation
@@ -17,7 +27,7 @@ from final_submit import final_verify
 from utils import mouse_call, extract_for_annotations, linear_data, addBBox, linear_remove, remove_left_lights
 from utils import Task
 import utils
-from guiutils import AssetSelectWindow
+from guiutils import AssetSelectWindow, mainwindow
 """
 LAYOUT DESIGN
 """
@@ -115,51 +125,7 @@ def addtoJSON(frameNo, asset, bbox, data, id_):
 def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
     column = ''
     PLAY = True
-    sg.theme('DarkBlue14')
-    col11 = sg.Image(filename='seek.png', key='image')  # Coloumn 1 = Image view
-    Output = sg.Text()
-    Input = sg.Text()
-    Error = sg.Text()
-    col12 = [[sg.Text('ENTER VIDEO PATH')],
-             # [sg.Slider(range=(0, 1000), default_value=0, size=(50, 10), orientation="h",enable_events=True, key="slider")],
-             [sg.Text('Video Path', size=(12, 1)), sg.InputText('', key='-IN-', size=(38, 1)), sg.FileBrowse()],
-             [sg.Text('Json Path', size=(12, 1)), sg.InputText('', key='CSV', size=(38, 1)), sg.FileBrowse()],
-             [sg.Button('Submit Videos', size=(12, 1))],
-             [sg.Text('VIDEO PLAY')],
-
-             [sg.Button('PLAY', size=(12, 1))],
-             [sg.Text('Frame No:', size=(12, 1)), sg.InputText('', key='skip', size=(38, 1)),sg.Button('Go', size=(6, 1))],
-             
-             [sg.Text('MODIFY MASTER')],
-             [sg.Button('Divert', size=(12, 1))],
-             # [sg.Button('Add Data', size=(12, 1)), sg.InputCombo([], size=(40,4), key='Coloumn'), sg.Button('Select1')],
-             [sg.Button('Add Data', size=(12, 1))],
-             [sg.Button('Delete Data', size=(12, 1)), sg.InputCombo([], size=(40, 4), key='Delete_drop'),
-              sg.Button('Select')],
-             [sg.Text('NAVIGATE')],
-             [sg.Button('START', size=(12, 1)), sg.Button('STOP', size=(12, 1)),sg.Button('RemoveAsset', size=(12, 1))],
-
-             [sg.Button('PREVIOUS', size=(12, 1)), sg.Button('NEXT', size=(12, 1)),sg.InputCombo([], size=(12, 1), key='Removefr')],
-             [sg.Button('Generate'), sg.Text('<-Generate final json', size=(35, 1))],
-             [sg.Button('SAVE FRAME', size=(12, 1)), sg.Button('EXIT', size=(12, 1)), sg.Text('', key='text'), Output,
-              sg.Text('Frame no: '), Input]]
-    # Select Color Theme
-    tab1 = [[col11, sg.Frame(layout=col12, title='Details TO Enter')],
-        [sg.Slider(range=(0, 1000), default_value=0, size=(200, 5), tick_interval=500, orientation="h",
-                   enable_events=True, key="slider")]]
-
-
-
-    # df = pd.read_csv("https://tlviz.s3.ap-south-1.amazonaws.com/SeekRight/MASTER_VERIFICATION_FILES/assets_sheet.csv")
-    # df
-    # sg.theme('DarkGrey5')
-    # sg.theme('Black')
-    layout = [[sg.TabGroup([[sg.Tab('STEMA', tab1, tooltip='tip')]])]]
-    # Frame windows
-    window = sg.Window('Data Verification Toolbox',
-                       layout, resizable=True, finalize=True, return_keyboard_events=True, use_default_focus=False)
-
-    window.finalize()
+    window ,Input = mainwindow()
 
     Shift = False
     stream=False
@@ -192,7 +158,7 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
 
 
 
-        if event == 'EXIT' or event == sg.WIN_CLOSED:
+        if event == 'EXIT' :# or event == sg.WIN_CLOSED:
             return "STOP"
         if event == 'Go' or (len(values['skip']) and ("Return" in event or event == "\r")):
             if int(values['skip']) % 2 == 0:
@@ -233,6 +199,8 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                     
                 linear = linear_data(data,total_frames,w)
                 lin = set(config["linear"])
+                for x in set(config["fixed"]):
+                    data[x] = data.get(x,9900)
                 assets = []
                 for x in data:
                     try:
@@ -415,6 +383,13 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
 
 if __name__ == "__main__":
     ip,CSV = verify()
+
+
+    Shift = False
+    stream=False
+    window_read = True
+    # ip = ''
+
     breaker=True
     index=0
     while ip is not None:
