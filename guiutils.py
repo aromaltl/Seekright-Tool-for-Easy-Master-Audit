@@ -70,6 +70,7 @@ class AssetSelectWindow:
         for x in keys:
             self.assets.add(x.replace("_Start","").replace("_End",""))
         keys = list(self.assets)
+        keys.sort(key =lambda x : x.replace("Bad_",""))
         d = len(keys)
         r = d % cols
         keys = keys + [""] * (cols - r)
@@ -83,14 +84,18 @@ class AssetSelectWindow:
         
         win = sg.Window("Select Asset", layout, resizable=True, keep_on_top=True, finalize=True, enable_close_attempted_event=True,
                         element_justification='c', return_keyboard_events=True)
-        win2 = sg.Window("Select Asset", self.extrabuttons , resizable=True, keep_on_top=True, finalize=True, enable_close_attempted_event=True,
-                    element_justification='c', return_keyboard_events=False)
-        if hide:
+        if self.asset_window2 is None:
+            win2 = sg.Window("Select Asset", self.extrabuttons , resizable=True, keep_on_top=True, finalize=True, enable_close_attempted_event=True,
+                        element_justification='c', return_keyboard_events=False)
+            
+            self.asset_window2 = win2
             win2.hide()
+        if hide:
             win.hide()
+            
         
-        self.asset_window =win
-        self.asset_window2 =win2
+        self.asset_window = win
+        
         
 
     def asset_select_window(self,data):
@@ -110,12 +115,13 @@ class AssetSelectWindow:
                 if val["New_Asset"] not in data:
                         
                     data[val["New_Asset"].replace("_Start","").replace("_End","")] = 9900
-                    
+                    self.asset_window.Hide()
+                    self.close()
                     self.assets.add(val["New_Asset"])
                     assetlist = list(self.assets)
                     assetlist.sort(key=lambda strings: strings.replace("Bad_",""))
                     self.create_asset_select_window(assetlist, 6,hide=False)
-                    #self.asset_window.close()
+                    # self.asset_window.close()
 
             elif column  in self.assets or column == "-WINDOW CLOSE ATTEMPTED-" or column == "SELECTALL":
                 for fil in self.assets :
