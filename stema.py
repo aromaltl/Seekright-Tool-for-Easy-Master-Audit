@@ -253,15 +253,27 @@ def verify(ip=None,CSV=None,output_frame=0,auto_start=None):
                 if r[2] + r[3] < 10 :
                     continue
                 #####################################
-                data[PREV_SELECTED_ASSET] += 1
+                
+
+
+                
                 BASE_PREV_SELECTED_ASSET = PREV_SELECTED_ASSET.replace("_Start","").replace("_End","")
                 if BASE_PREV_SELECTED_ASSET in lin:
                     side = '1' if  (r[0]+(r[2]//2) ) > w//2 else '0'
-                    
+
                     # if data["flag"][BASE_PREV_SELECTED_ASSET][side]==1: # only at end 
                     linear_remove(data,BASE_PREV_SELECTED_ASSET,side,output_frame,w)
                     if PREV_SELECTED_ASSET != BASE_PREV_SELECTED_ASSET:
                         data["flag"][BASE_PREV_SELECTED_ASSET][side]=(data["flag"][BASE_PREV_SELECTED_ASSET][side]+1)%2
+                
+                        if 'control_l' in event.lower():
+                            if data["flag"][BASE_PREV_SELECTED_ASSET][side]:
+                                PREV_SELECTED_ASSET = BASE_PREV_SELECTED_ASSET + "_Start"
+                            else:
+                                PREV_SELECTED_ASSET = BASE_PREV_SELECTED_ASSET + "_End"
+
+                
+                data[PREV_SELECTED_ASSET] += 1
 
                 addtoJSON(output_frame, PREV_SELECTED_ASSET, [(r[0], r[1]), (r[2] + r[0], r[3] + r[1])], data,
                         data[PREV_SELECTED_ASSET])
