@@ -136,6 +136,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
 
              [sg.Button('Previous Frame', size=(15, 1)), sg.Button('Next Frame', size=(15, 1))],
              [sg.Text('Change Assets')],
+             [sg.Slider(range=(0, 10), default_value=0, size=(50, 10), orientation="h",enable_events=True, key="slider")],
              [sg.Button('Previous Asset', size=(15, 1)), sg.Button('Next Asset', size=(15, 1))],
              [sg.Button('BACK', size=(15, 1)), sg.Text('Frame no: '), Input],
              [sg.Text('FINAL SUBMISSION')],
@@ -157,6 +158,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
     prev_asset=""
     push_ind =0
     frame_toggle = 2
+
     while True:
         
         event, values = window.read()
@@ -175,6 +177,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
                 if json is None:
                     json = values['JSON']
             if event == "START":
+
                 # print(ip,index,output_frame,"#########")
                 video_name = os.path.basename(ip).replace('.MP4', '')
                 data = load_json(json)
@@ -190,6 +193,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
                     if len(each) == 7:
                         each.append(each[2])
                 total_assets = len(data["Assets"])
+                window["slider"].update( range=(1, total_assets))
                 current = data["Assets"][index]
                 # prev_asset = current[0].replace("RIGHT_","").replace("LEFT_","")
                 output_frame = current[2]
@@ -212,6 +216,11 @@ def final_verify(ip=None, json=None, stream=False,index=0):
         if not stream:
             continue
 
+        if event == 'slider':
+            index = int(values['slider'])-1
+            current = copy.deepcopy(data["Assets"][index])
+            output_frame = current[2]
+            push_ind=0
 
         if event == "Next Asset" or event == 'Right:114' or event == "Right:39":
             index = min(index + 1, total_assets - 1)
@@ -331,6 +340,7 @@ def final_verify(ip=None, json=None, stream=False,index=0):
         else:
             new_pos.update(value=current[7],text_color='Yellow')
         imgbytes = cv2.imencode('.png', image)[1].tobytes()  # ditto
+        window["slider"].update(value=index+1)
         window['image'].update(data=imgbytes)
         window['New Pos'].Update(values=show_near_frames(data,index))
          
